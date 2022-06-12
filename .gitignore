@@ -1,0 +1,45 @@
+# Ignore everything
+*
+
+!.gitignore
+!CPP_Tetris.ioc
+
+# Keep CM4 App files
+!/CM4
+!CM4/App
+!CM4/App/*
+!CM4/App/*/*.c
+!CM4/App/*/*.cpp
+!CM4/App/*/*.h
+
+#Keep Libraries
+!/CM4
+!CM4/App
+!CM4/App/Lib
+!CM4/App/Lib/*
+!CM4/App/Lib/*/*.c
+!CM4/App/Lib/*/*.cpp
+!CM4/App/Lib/*/*.h
+
+# Keep files from LwIP because they are modified by hand
+!/CM4
+!CM4/LWIP
+!CM4/LWIP/*
+!CM4/LWIP/*/*
+
+# Keep CM7 App files
+!/CM7
+!CM7/App
+!CM7/App/*
+!CM7/App/*/*.c
+!CM7/App/*/*.cpp
+!CM7/App/*/*.h
+
+#Keep Libraries
+!/CM7
+!CM7/App
+!CM7/App/Lib
+!CM7/App/Lib/*
+!CM7/App/Lib/*/*.c
+!CM7/App/Lib/*/*.cpp
+!CM7/App/Lib/*/*.h
