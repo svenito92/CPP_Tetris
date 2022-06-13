@@ -118,7 +118,7 @@ private:
 	const uint8_t PYR2[4] = {0,1,2,11};
 	const uint8_t PYR3[4] = {1,10,11,21};
 
-	const uint8_t FIRST_ORIGIN = 4;
+	const uint8_t FIRST_ORIGIN = 3;
 	
 	bool lowestSquareInThisColumn(uint8_t fieldNo, uint8_t *blockArray);
 	uint8_t rowDifference(uint8_t field, uint8_t *column);

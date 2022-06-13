@@ -109,6 +109,7 @@ void Looper::run() {
 		 gameState = startGame;
 		 if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1))
 		 { // button pushed
+
 			processState = gameSettingsSp;
 		 }
 		 else if (false)
@@ -186,7 +187,7 @@ void Looper::runGame() {
 			break;
 		case generateNewBlock:
 			stateNewBlock();
-			gameState = blockDown; // insert new Block => Checkt ob Block platziert werden kann
+			gameState = spawnblock; // insert new Block => Checkt ob Block platziert werden kann
 			break;
 		case blockDown:
 			//
@@ -240,13 +241,19 @@ void Looper::runGame() {
 				gameState = generateNewBlock;
 			}
 			break;
+		case spawnblock:
+			//Check if new Block can be spawn or if colision
+			stateSpawnBlock();
+
+			break;
+
 		}
 //	}
 }
 
 // Generates 5 new block in the array with default origin
 void Looper::generateBlocks() {
-	for (uint8_t i = 0; i < sizeof(playBlocks); i++) {
+	for (uint8_t i = 0; i < 5; i++) {
 		playBlocks[i].renewBlock(calculations.getRdmBlock());
 	}
 }
@@ -360,6 +367,26 @@ void Looper::stateKillLine() {
 	}
 }
 
+// state spawnblock
+void Looper::stateSpawnBlock() {
+	uint8_t *pointerBlockPos = playBlocks[currentBlockNo].getBlockPositions();
+
+	for (uint8_t i = 0; i < 4; i++) {
+		if(playground.getField((*pointerBlockPos))!= 0)
+		{
+			processState = gameOver;
+			gameState = startGame;
+			i=10;
+		}
+		else
+		{
+			gameState = idle;
+		}
+		pointerBlockPos++;
+	}
+	return;
+}
+
 // changew state in blockDown state
 //  TO DO, include push buttons
 void Looper::changeStateInBlockDown() {
@@ -376,20 +403,24 @@ void Looper::changeStateInBlockDown() {
 
 // transitions in idle state
 void Looper::changeStateIdle() {
-	if (timer >= moveBlockTimer) {
-	// AND BUTTON PUSHED
+
+	if ((HAL_GetTick()-timer) >= moveBlockTimer) {
+
+		timer = HAL_GetTick();
+//		LCD_CS0;
 		counter++;
-		if (true) {                //BUTTON          //move block Joystick
+//		LCD_CS1;
+		if (((buttons&TFTSHIELD_BUTTON_UP)==0)||((buttons&TFTSHIELD_BUTTON_RIGHT)==0)||((buttons&TFTSHIELD_BUTTON_DOWN)==0)) {                //BUTTON          //move block Joystick
 			gameState = moveBlock;
-		} else if (false) {    //BUTTON     		// rotate block Button A
+		} else if((buttons&TFTSHIELD_BUTTON_1)==0) {    //BUTTON     		// rotate block Button A
 			gameState = rotateBlock;
-		} else if(false){							// fix block Button C
+		} else if((buttons&TFTSHIELD_BUTTON_3)==0){							// fix block Button C
 			gameState = fixBlock;
 		} else {
 			;
 		}
 	}
-	// AND BUTTON PUSHED
+
 	else if (counter >= blockDownCnt) {
 		counter = 0;
 		// fix block
