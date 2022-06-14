@@ -50,6 +50,7 @@ void Looper::run() {
 			//  ST7735_FillRectangle(0x0000, 0x0000, 0x0008, 0x0008, ST7735_RED);
 			// HAL_Delay(100);
 			/*	  			char text[] = "GAME START" ;
+			 *
 			 writeState(text, ST7735_BLUE);
 			 char text2[] = "1254821" ;
 			 writeScore(text2, ST7735_BLUE);
@@ -246,6 +247,11 @@ void Looper::runGame() {
 			stateSpawnBlock();
 
 			break;
+		case updateScreen:
+			//Check if new Block can be spawn or if colision
+			stateUpdateScreen();
+
+			break;
 
 		}
 //	}
@@ -264,8 +270,11 @@ void Looper::stateStartGame() {
 	score = 0;
 	killedLines = 0;
 	blocksInGame = 0;
+	srand(time(0));
 	generateBlocks(); // Hier gibt es bei mir einen HARDFAULT?? (Sven)
 	setUpField(); 	// TFT fct
+	writeScore(0x00000000, ST7735_BLUE); // set score to zero
+	setPreview(playBlocks[currentBlockNo].getBlockType());
 	playground.rstPlayground();
 	/// set level
 	// multiplayer settings
@@ -276,11 +285,11 @@ void Looper::stateNewBlock() {
 	blocksInGame++;
 	playBlocks[currentBlockNo].renewBlock(calculations.getRdmBlock());
 	currentBlockNo++;
-	if (currentBlockNo >= sizeof(playBlocks)) {
+	if (currentBlockNo >= 5) {
 		currentBlockNo = 0;
 	}
 	nextBlockNo++;
-	if (nextBlockNo >= sizeof(playBlocks)) {
+	if (nextBlockNo >= 5) {
 		nextBlockNo = 0;
 	}
 }
@@ -289,10 +298,8 @@ void Looper::stateNewBlock() {
 void Looper::stateBlockDown() {
 	// is alredy checked that the block is not on bottom
 
-											// Prüfen ob Block um eine Zeile runter geschoben werden darf
-
 	playBlocks[currentBlockNo].moveOneLineDown();
-
+	gameState = idle;
 	/*
 	 if (playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions()))
 	 {
@@ -389,7 +396,7 @@ void Looper::stateSpawnBlock() {
 
 // changew state in blockDown state
 //  TO DO, include push buttons
-void Looper::changeStateInBlockDown() {
+/*void Looper::changeStateInBlockDown() {
 	if (true) {           // move block
 		gameState = moveBlock;
 	} else if (false)     // rotate
@@ -399,7 +406,7 @@ void Looper::changeStateInBlockDown() {
 	{
 		gameState = idle;
 	}
-}
+}*/
 
 // transitions in idle state
 void Looper::changeStateIdle() {
@@ -419,10 +426,8 @@ void Looper::changeStateIdle() {
 		} else {
 			;
 		}
-	}
-
-	else if (counter >= blockDownCnt) {
-		counter = 0;
+	}else if ((HAL_GetTick()-counter) >= blockDownCnt) {
+		counter = HAL_GetTick();
 		// fix block
 		if (playground.isOnBottom(
 				playBlocks[currentBlockNo].getBlockPositions())) {
@@ -430,9 +435,34 @@ void Looper::changeStateIdle() {
 		} else {                           // block down
 			gameState = blockDown;
 		}
-	} else {                              // stay in state
+	} else if ((HAL_GetTick()-updateScreenCounter)>=updateScreenTime) {                              // stay in state
+		gameState = updateScreen;
+	}else
+	{
 		;
 	}
+}
+
+// update Screen in Blocking State
+void Looper::stateUpdateScreen() {
+
+	uint8_t unitedFieldData[200]={0};
+
+	for(uint8_t i=0;i<=199; i++)
+	{
+		unitedFieldData[i]= playground.getField(i) ;
+	}
+
+	uint8_t *pointerBlockPos = playBlocks[currentBlockNo].getBlockPositions();
+	uint8_t fieldNo;
+
+	for (uint8_t i = 0; i < 4; i++) {
+		fieldNo = *pointerBlockPos;
+		unitedFieldData[fieldNo] = playBlocks[currentBlockNo].getBlockType();
+		pointerBlockPos++;
+	}
+	drawField(unitedFieldData);
+	gameState = idle;
 }
 
 // Finalize game, change states and stop loop

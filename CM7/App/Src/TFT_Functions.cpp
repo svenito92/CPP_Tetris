@@ -154,7 +154,7 @@ void drawPreview(uint16_t x, uint16_t y, uint16_t setFields, uint16_t color)
 
 void drawField(uint8_t * fieldData){
 
-static uint8_t oldFieldData[200];
+static uint8_t oldFieldData[200] = { 0 };
 uint8_t counter = 0;
 uint16_t color=0;
 
@@ -167,13 +167,12 @@ uint16_t color=0;
 			{
 				color = getColor(*fieldData);
 				ST7735_FillRectangle((0x0000 + (u*8)), (0x0000 + (i*8)), 0x0008, 0x0008, color);
+				oldFieldData[counter]=*fieldData;
 			}
 			counter++;
 			fieldData++;
 		}
 	}
-
-
 }
 
 uint16_t getColor(uint8_t color)

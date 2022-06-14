@@ -53,7 +53,8 @@ public:
     fixBlock = 100,
     killLine = 110,
     insertLine = 120,
-	spawnblock = 130
+	spawnblock = 130,
+	updateScreen =140
   };
 
   enum BlockType
@@ -76,11 +77,13 @@ private:
   GameState gameState = startGame;
 
   // timer and timer references
-  uint16_t moveBlockTimer = 50;	// in ms
-  const uint8_t INIT_BLOCK_DOWN_CNT = 20;
+  uint32_t updateScreenTime = 51; // in ms
+  uint32_t moveBlockTimer = 50;	// in ms
+  const uint32_t INIT_BLOCK_DOWN_CNT = 1000; // 1000ms
   uint8_t blockDownCnt = INIT_BLOCK_DOWN_CNT; // numbers of moves before move block one field down
-  uint16_t timer;		// when timer "overflows" move block
-  uint8_t counter;	// counts how often the move timer overflowed
+  uint32_t timer;		// when timer "overflows" move block
+  uint32_t counter;		// counts how often the move timer overflowed
+  uint32_t updateScreenCounter;
 
   // game controll
   uint16_t score = 0;
@@ -110,7 +113,7 @@ private:
   void stateFixBlock();
   void stateKillLine();
   void stateSpawnBlock();
-
+  void stateUpdateScreen();
   // transition requirements from states
   void changeStateInBlockDown();
   void changeStateIdle();

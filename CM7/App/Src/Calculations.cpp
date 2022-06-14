@@ -6,6 +6,8 @@
  */
 
 #include "Calculations.h"
+#include "TFT_Functions.h"
+
 
 Calculations::Calculations() {
 	// TODO Auto-generated constructor stub
@@ -18,14 +20,17 @@ Calculations::~Calculations() {
 
 // returns a rdm value between 1..7
 uint8_t Calculations::getRdmBlock(){
-    srand(time(NULL));
-
-    return ((rand()%7) + 1);
+	uint32_t test;
+	uint8_t test2;
+ //   srand(HAL_GetTick());
+    test = rand();
+    test2 =((uint8_t)(test%7)) + 1;
+    return (((uint8_t)(test%7)) + 1);
 }
 
 // returns a rdm value between 0..9
 uint8_t Calculations::getRdmSpaceInNewLine(){ //uint16_t
-    srand(time(NULL));
+   // srand(time(NULL));
 
 /*    uint16 randomLine = 0;
     for(uint8_t i=0; i<=9; i++)
