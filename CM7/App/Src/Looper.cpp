@@ -196,7 +196,7 @@ void Looper::runGame() {
 			gameState = idle;
 			break;
 		case moveBlock:
-			stateMoveBlock();
+			stateMoveBlock(buttonPressed);
 			gameState = idle;
 			break;
 
@@ -320,20 +320,21 @@ void Looper::stateBlockDown() {
 }
 
 // TO DO!!!!!!!!!!!! BUTTONS PUSHED, CHECK EDGE
-void Looper::stateMoveBlock() {
+void Looper::stateMoveBlock(uint8_t ButtonActive) {
 	// move possible
 	// do move
-	if (playground.isSpaceRight(											// Joystick right
-			playBlocks[currentBlockNo].getBlockPositions())) {
-		//&& btnPushed){     TO DO
-		// move right
-		playBlocks[currentBlockNo].moveRight();
-	} else if (playground.isSpaceLeft(										// Joystick left
-			playBlocks[currentBlockNo].getBlockPositions())) {
-		// && btnPushed){
+	if(ButtonActive==1){
+		if (playground.isSpaceRight(playBlocks[currentBlockNo].getBlockPositions())) {										// Joystick right
+			// move right
+			playBlocks[currentBlockNo].moveRight();
+		}
+	} else if(ButtonActive==2){
+		if (playground.isSpaceLeft(playBlocks[currentBlockNo].getBlockPositions())) {										// Joystick left
+
 		// move left
 		playBlocks[currentBlockNo].moveLeft();
-	} else if (false) {        //TO DO MOVE TO BOTTOM WHEN BUTTON PUSHED 	// Joystick down
+		}
+	} else if (ButtonActive==3) {        //TO DO MOVE TO BOTTOM WHEN BUTTON PUSHED 	// Joystick down
 		// Move to bottom
 		// GET COLUMNS
 		//void moveToBottom(uint8_t *fourColums);
@@ -418,11 +419,23 @@ void Looper::changeStateIdle() {
 		counter++;
 //		LCD_CS1;
 		if (((buttons&TFTSHIELD_BUTTON_UP)==0)||((buttons&TFTSHIELD_BUTTON_RIGHT)==0)||((buttons&TFTSHIELD_BUTTON_DOWN)==0)) {                //BUTTON          //move block Joystick
+			if((buttons&TFTSHIELD_BUTTON_UP)==0) buttonPressed=1;
+			else if(((buttons&TFTSHIELD_BUTTON_DOWN)==0)) buttonPressed=2;
+			else if(((buttons&TFTSHIELD_BUTTON_RIGHT)==0)) buttonPressed=3;
 			gameState = moveBlock;
 		} else if((buttons&TFTSHIELD_BUTTON_1)==0) {    //BUTTON     		// rotate block Button A
 			gameState = rotateBlock;
 		} else if((buttons&TFTSHIELD_BUTTON_3)==0){							// fix block Button C
+			if (playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions()))
 			gameState = fixBlock;
+			else
+			{
+				while(!(playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions())))
+				{
+					stateBlockDown();
+				}
+				gameState = fixBlock;
+			}
 		} else {
 			;
 		}

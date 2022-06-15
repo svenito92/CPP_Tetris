@@ -190,8 +190,9 @@ bool Playground::isLineFull(uint8_t lineNo) {
 // block array as pointer
 bool Playground::isSpaceRight(uint8_t *blockArray) {
 	for (uint8_t i = 0; i < 4; i++) {
-		if (*blockArray + 1 != 0) {
+		if (fields[*blockArray + 1] != 0) {
 			return false;
+
 		}
 		blockArray++;
 	}
@@ -202,7 +203,7 @@ bool Playground::isSpaceRight(uint8_t *blockArray) {
 // block array as pointer
 bool Playground::isSpaceLeft(uint8_t *blockArray) { // playground as pointer and block as pointer
 	for (uint8_t i = 0; i < 4; i++) {
-		if (*blockArray - 1 != 0) {
+		if (fields[*blockArray + 1]  != 0) {
 			return false;
 		}
 		blockArray++;

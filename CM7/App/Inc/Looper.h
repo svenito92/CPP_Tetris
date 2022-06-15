@@ -84,6 +84,7 @@ private:
   uint32_t timer;		// when timer "overflows" move block
   uint32_t counter;		// counts how often the move timer overflowed
   uint32_t updateScreenCounter;
+  uint8_t buttonPressed;
 
   // game controll
   uint16_t score = 0;
@@ -108,7 +109,7 @@ private:
   void stateStartGame();
   void stateNewBlock();
   void stateBlockDown();
-  void stateMoveBlock();
+  void stateMoveBlock(uint8_t ButtonActive);
   void stateRotateBlock();
   void stateFixBlock();
   void stateKillLine();

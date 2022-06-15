@@ -160,11 +160,11 @@ void Block::moveRight() {
 // Call this method just after a check
 void Block::moveLeft() {
 	uint8_t tmpOrigin = origin-1;
-		uint8_t array[4];
-		originToArray(tmpOrigin, array, rotation, blockType);
-		if(!overflowLeft(tmpOrigin, array)){
-			origin--;
-		}
+	uint8_t array[4];
+	originToArray(tmpOrigin, array, rotation, blockType);
+	if(!overflowLeft(tmpOrigin, array)){
+		origin--;
+	}
 }
 
 /*
@@ -193,7 +193,7 @@ uint8_t Block::rowDifference(uint8_t field, uint8_t *column){
 // Check edge overflow on the right playground edge
 bool Block::overflowRight(uint8_t origin, uint8_t *array){
 	for(uint8_t i = 0;i<4;i++){
-		if (origin > 5 && (*array % 10) < 5)return true;
+		if ((*array % 10) <= 0) return true;
 		array++;
 	}
 	return false;
@@ -202,7 +202,7 @@ bool Block::overflowRight(uint8_t origin, uint8_t *array){
 // Check edge overflow on the left playground edge
 bool Block::overflowLeft(uint8_t origin, uint8_t *array){
 	for(uint8_t i = 0;i<4;i++){
-		if (origin < 5 && (*array % 10) > 5)return true;
+		if ((*array % 10) >= 9) return true;
 		array++;
 	}
 	return false;
