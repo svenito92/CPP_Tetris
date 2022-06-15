@@ -430,7 +430,7 @@ void Looper::changeStateIdle() {
 		counter = HAL_GetTick();
 		// fix block
 		if (playground.isOnBottom(
-				playBlocks[nextBlockNo].getBlockPositions())) {
+				playBlocks[currentBlockNo].getBlockPositions())) {
 			gameState = fixBlock;
 		} else {                           // block down
 			gameState = blockDown;
@@ -462,7 +462,7 @@ void Looper::stateUpdateScreen() {
 		pointerBlockPos++;
 	}
 	drawField(unitedFieldData);
-	setPreview(playBlocks[currentBlockNo].getBlockType());
+	setPreview(playBlocks[nextBlockNo].getBlockType());
 	gameState = idle;
 }
 
