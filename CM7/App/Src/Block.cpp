@@ -31,7 +31,7 @@ Block::~Block() {
 void Block::renewBlock(uint8_t type) {
 	Block::blockType = type;
 	if (type == 2) {
-		origin = 0x04;
+		origin = 0x14;
 	} else {
 		origin = FIRST_ORIGIN;
 	}

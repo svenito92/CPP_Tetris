@@ -117,12 +117,12 @@ void setPreview(uint8_t block)
 			x = 0x0056;
 			y = 0x0008;
 			break;
-	case 3: setFields = 0x0630;		// S
+	case 3: setFields = 0x0360;		// S
 			color = ST7735_GREEN;
 			x = 0x005A;
 			y = 0x0008;
 			break;
-	case 4: setFields = 0x0360;		// Z
+	case 4: setFields = 0x0630;		// Z
 			color = ST7735_RED;
 			x = 0x005A;
 			y = 0x0008;
@@ -215,6 +215,10 @@ uint16_t getColor(uint8_t color)
 	case 6:		retColor = ST7735_ORANGE;
 				break;
 	case 7:		retColor = ST7735_MAGENTA;
+				break;
+	case 8: 	retColor = ST7735_WHITE;
+				break;
+	case 9:		retColor = ST7735_LIGHTGREEN;
 				break;
 	default:	retColor = ST7735_BLACK;
 				break;
