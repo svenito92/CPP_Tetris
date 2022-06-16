@@ -203,8 +203,9 @@ void Looper::runGame() {
 			break;
 		case moveBlock:
 			HAL_UART_Transmit(&huart3,(const uint8_t*)"Move block\n", 11, 0xFFFF);
-			stateMoveBlock(buttonPressed);
 			gameState = idle;
+			stateMoveBlock(buttonPressed);
+			buttonPressed=0;
 			break;
 		case rotateBlock:
 			HAL_UART_Transmit(&huart3,(const uint8_t*)"Rotate block\n", 12, 0xFFFF);
@@ -387,7 +388,11 @@ void Looper::stateMoveBlock(uint8_t ButtonActive) {
 		// Move to bottom
 		// GET COLUMNS
 		//void moveToBottom(uint8_t *fourColums);
-		gameState = blockDown;
+		if (playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions())) {
+					gameState = fixBlock;
+		} else {                           // block down
+					gameState = blockDown;
+		}
 	}
 }
 
@@ -464,29 +469,42 @@ void Looper::stateSpawnBlock() {
 // transitions in idle state
 void Looper::changeStateIdle() {
 
-	if ((HAL_GetTick()-timer) >= moveBlockTimer) {
 
+	if ((HAL_GetTick()-timer) >= moveBlockTimer) {
 		timer = HAL_GetTick();
+		holdButtons();
+
+
 //		LCD_CS0;
 		counter++;
 //		LCD_CS1;
-		if (((buttons&TFTSHIELD_BUTTON_UP)==0)||((buttons&TFTSHIELD_BUTTON_RIGHT)==0)||((buttons&TFTSHIELD_BUTTON_DOWN)==0)) {                //BUTTON          //move block Joystick
-			if((buttons&TFTSHIELD_BUTTON_UP)==0) buttonPressed=1;
-			else if(((buttons&TFTSHIELD_BUTTON_DOWN)==0)) buttonPressed=2;
-			else if(((buttons&TFTSHIELD_BUTTON_RIGHT)==0)) buttonPressed=3;
+		if ((((buttons&TFTSHIELD_BUTTON_UP)==0)&& buttonUpHold==0)||(((buttons&TFTSHIELD_BUTTON_RIGHT)==0)&& buttonRightHold==0)||(((buttons&TFTSHIELD_BUTTON_DOWN)==0))&& buttonDownHold==0) {                //BUTTON          //move block Joystick
+			if((buttons&TFTSHIELD_BUTTON_UP)==0 && buttonUpHold==0){
+				buttonPressed=1;
+				buttonUpHold = 1;
+			}
+			else if(((buttons&TFTSHIELD_BUTTON_DOWN)==0)&& buttonDownHold==0) {
+				buttonPressed=2;
+				buttonDownHold = 1;
+			}
+			else if(((buttons&TFTSHIELD_BUTTON_RIGHT)==0)&& buttonRightHold==0) {
+				buttonPressed=3;
+				buttonRightHold = 1;
+			}
 			gameState = moveBlock;
-		} else if((buttons&TFTSHIELD_BUTTON_1)==0) {    //BUTTON     		// rotate block Button A
+		} else if((buttons&TFTSHIELD_BUTTON_1)==0 && buttonAHold==0) {    //BUTTON     		// rotate block Button A
+			buttonAHold = 1;
 			gameState = rotateBlock;
-		} else if((buttons&TFTSHIELD_BUTTON_3)==0){							// fix block Button C
-			if (playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions()))
-			gameState = fixBlock;
-			else
-			{
-				while(!(playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions())))
-				{
+		} else if((buttons&TFTSHIELD_BUTTON_3)==0 && buttonCHold==0){							// fix block Button C
+			buttonCHold = 1;
+			if (playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions())){
+				gameState = fixBlock;
+			}
+		else{
+				while(!(playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions()))){
 					stateBlockDown();
 				}
-				btnReleased();
+//				btnReleased();
 				gameState = fixBlock;
 			}
 		} else {
@@ -495,8 +513,7 @@ void Looper::changeStateIdle() {
 	}else if ((HAL_GetTick()-counter) >= blockDownCnt) {
 		counter = HAL_GetTick();
 		// fix block
-		if (playground.isOnBottom(
-				playBlocks[currentBlockNo].getBlockPositions())) {
+		if (playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions())) {
 			gameState = fixBlock;
 		} else {                           // block down
 			gameState = blockDown;
@@ -558,5 +575,34 @@ void Looper::testFct() {
 			test.createGapSidePlaygrount(i);
 		}
 
+	}
+}
+
+void Looper::holdButtons()
+{
+
+	if(buttonAHold!=0){
+		buttonAHold++;
+		if (buttonAHold>=3) buttonAHold=0;
+	}
+
+	if(buttonCHold!=0){
+		buttonCHold++;
+		if (buttonCHold>=5) buttonCHold=0;
+	}
+
+	if(buttonUpHold!=0){
+		buttonUpHold++;
+		if (buttonUpHold>=3) buttonUpHold=0;
+	}
+
+	if(buttonDownHold!=0){
+		buttonDownHold++;
+		if (buttonDownHold>=3) buttonDownHold=0;
+	}
+
+	if(buttonRightHold!=0){
+		buttonRightHold++;
+		if (buttonRightHold>=3) buttonRightHold=0;
 	}
 }
