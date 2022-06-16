@@ -25,71 +25,6 @@ void Looper::run() {
 	// main loop here
 	processState = init;
 	while (true) {
-/*		buttons = 0;
-		buttons = ss.readButtons();
-
-
-
-
-		if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1)) {
-			//  ST7735_FillRectangle(0x0000, 0x0000, 0x0008, 0x0008, ST7735_RED);
-			// HAL_Delay(100);
-			ST7735_FillScreen(ST7735_GREEN);
-			HAL_Delay(30);
-		}
-
-		if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_2)) {
-			setUpField();
-			HAL_Delay(50);
-
-		}
-		if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_3)) {
-			//  ST7735_FillRectangle(0x0000, 0x0000, 0x0008, 0x0008, ST7735_RED);
-			// HAL_Delay(100);
-			/*	  			char text[] = "GAME START" ;
-			 *
-			 writeState(text, ST7735_BLUE);
-			 char text2[] = "1254821" ;
-			 writeScore(text2, ST7735_BLUE);
-			setPreview(1);
-			setPreview(2);
-			setPreview(3);
-			setPreview(4);
-			setPreview(5);
-			setPreview(6);
-			setPreview(7);
-//		  	setPreview(0);
-			HAL_Delay(30);
-
-		}
-		if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_DOWN)) {
-			char text[] = "GAME START";
-			writeState(text, ST7735_BLUE);
-			uint32_t score = 1010101015;
-			writeScore(score, ST7735_BLUE);
-			HAL_Delay(50);
-		}
-
-		if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_UP)) {
-			uint8_t fieldData[200];
-			for (uint8_t i = 0; i <= 50; i++) {
-				fieldData[i] = 0x01;
-			}
-
-			for (uint8_t i = 51; i <= 110; i++) {
-				fieldData[i] = 0x03;
-			}
-
-			for (uint8_t i = 111; i <= 199; i++) {
-				fieldData[i] = 0x05;
-			}
-
-			drawField(fieldData);
-			HAL_Delay(50);
-		}
-
-		HAL_Delay(10);
-		*/
 		buttons = ss.readButtons();
 		switch (processState)
 		 {
@@ -97,13 +32,18 @@ void Looper::run() {
 			 // Status LED
 			 HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 			 HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
-			 processState = selectGameMode;
+			 processState = selectGameModeSetScreen;
 			 break;
-		 case selectGameMode:
-			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"Select GameMode\n", 16, 0xFFFF);
-			 writeState("SELECT GAME MODE", ST7735_BLUE);// Show screen
+		 case selectGameModeSetScreen:
+			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Select GameMode\n", 16, 0xFFFF);
+			 ST7735_FillScreen(ST7735_BLACK);
+			 writeState("Multi Game", ST7735_BLUE);// Show screen
+			 writeTopLine("Single Pl", ST7735_BLUE);// Show screen
+			 processState = selectGameModeBtnIn;
+		 case selectGameModeBtnIn:
+			 //HAL_Delay(500);
 			 // change state
-			 gameState = startGame;
+			 //gameState = startGame;
 			 if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1))
 			 { // button pushed
 

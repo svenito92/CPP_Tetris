@@ -3,6 +3,7 @@
 #include "main.h"
 
 void setUpField();
+uint8_t writeTopLine(char *text, uint16_t color);
 uint8_t writeState(char *text, uint16_t color);
 uint8_t writeScore(uint32_t score, uint16_t color);
 void setPreview(uint8_t block);

@@ -31,7 +31,8 @@ public:
   enum ProcessState
   {
     init = 0,
-    selectGameMode = 10,
+    selectGameModeSetScreen = 10,
+	selectGameModeBtnIn = 15,
     gameSettingsSp = 20,
     gameSettingsMp = 30,
     singlePlayer = 40,
