@@ -203,9 +203,9 @@ void Looper::runGame() {
 			break;
 		case moveBlock:
 			HAL_UART_Transmit(&huart3,(const uint8_t*)"Move block\n", 11, 0xFFFF);
+			gameState = idle;
 			stateMoveBlock(buttonPressed);
 			buttonPressed=0;
-			gameState = idle;
 			break;
 		case rotateBlock:
 			HAL_UART_Transmit(&huart3,(const uint8_t*)"Rotate block\n", 12, 0xFFFF);
@@ -367,7 +367,11 @@ void Looper::stateMoveBlock(uint8_t ButtonActive) {
 		// Move to bottom
 		// GET COLUMNS
 		//void moveToBottom(uint8_t *fourColums);
-		gameState = blockDown;
+		if (playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions())) {
+					gameState = fixBlock;
+		} else {                           // block down
+					gameState = blockDown;
+		}
 	}
 }
 
@@ -488,8 +492,7 @@ void Looper::changeStateIdle() {
 	}else if ((HAL_GetTick()-counter) >= blockDownCnt) {
 		counter = HAL_GetTick();
 		// fix block
-		if (playground.isOnBottom(
-				playBlocks[currentBlockNo].getBlockPositions())) {
+		if (playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions())) {
 			gameState = fixBlock;
 		} else {                           // block down
 			gameState = blockDown;
