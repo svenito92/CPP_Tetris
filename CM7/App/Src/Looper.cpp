@@ -508,11 +508,11 @@ void Looper::changeStateIdle() {
 // update Screen in Blocking State
 void Looper::stateUpdateScreen() {
 
-	uint8_t unitedFieldData[200]={0};
+	uint8_t unitedFieldData[200]={0}, test;
 
 	for(uint8_t i=0;i<=199; i++)
 	{
-		unitedFieldData[i]= playground.getField(i) ;
+		unitedFieldData[i]= playground.getField(i+10) ;
 	}
 
 	uint8_t *pointerBlockPos = playBlocks[currentBlockNo].getBlockPositions();
@@ -524,6 +524,7 @@ void Looper::stateUpdateScreen() {
 		pointerBlockPos++;
 	}
 	drawField(unitedFieldData);
+	test = playBlocks[nextBlockNo].getBlockType();
 	setPreview(playBlocks[nextBlockNo].getBlockType());
 	gameState = idle;
 }
