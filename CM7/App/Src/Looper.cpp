@@ -18,16 +18,13 @@ Looper::~Looper() {
 }
 
 void Looper::run() {
-	//HAL_UART_Transmit(&huart3,(const uint8*)"Start run\n", 10, 0xFFFF);
+	//HAL_UART_Transmit(&huart3,(const uint8_t*)"Start run\n", 10, 0xFFFF);
 
 	// init system, ethernet, screen, buttons
 	initScreen();
-
 	// main loop here
 	processState = init;
 	while (true) {
-
-
 /*		buttons = 0;
 		buttons = ss.readButtons();
 
@@ -97,60 +94,67 @@ void Looper::run() {
 		switch (processState)
 		 {
 		 case init:
-
-				// Status LED
-		 HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-		 HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
-
-		 processState = selectGameMode;
-		 break;
-
+			 // Status LED
+			 HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+			 HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
+			 processState = selectGameMode;
+			 break;
 		 case selectGameMode:
-		 // Show screen
-		 gameState = startGame;
-		 if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1))
-		 { // button pushed
+			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"Select GameMode\n", 16, 0xFFFF);
+			 writeState("SELECT GAME MODE", ST7735_BLUE);// Show screen
+			 // change state
+			 gameState = startGame;
+			 if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1))
+			 { // button pushed
 
-			processState = gameSettingsSp;
-		 }
-		 else if (false)
-		 {
-			processState = gameSettingsMp;
-		 }
-		 break;
-
+				processState = gameSettingsSp;
+			 }
+			 else if (false)
+			 {
+				processState = gameSettingsMp;
+			 }
+			 break;
 		 case gameSettingsSp:
-		 // Show screen, set start level aso.
-		 if (true)
-		 { // button pushed
+			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"Settings SP\n", 12, 0xFFFF);
+			 // Show screen, set start level aso.
 
-		 processState = singlePlayer;
-		 }
-		 break;
-
+			 writeState("PRESS A TO START THE GAME", ST7735_BLUE);
+			 // Start game
+			 if (true)
+			 { // button pushed
+			 processState = singlePlayer;
+			 }
+			 break;
 		 case gameSettingsMp:
-		 //implement see single player and add mp parameters
-		 break;
+			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"Settings MP\n", 12, 0xFFFF);
+			 //implement see single player and add mp parameters
+			 break;
 		 case singlePlayer:
-		 // maybe implement the loop here
-		 runGame(); // singlePlayer as parameter
-		 break;
+			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"SP game\n", 8, 0xFFFF);
+			 runGame(); // singlePlayer as parameter
+			 break;
 		 case multiPlayer:
-		 // maybe implement the loop here
-		 // implement
-		 runGame();
-		 break;
+			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"MP game\n", 12, 0xFFFF);
+			 // implement
+			 runGame();
+			 break;
 		 case gameOver:
-		 // show screen and wait a moment
-		 processState = ranking;
-		 break;
+			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Game Over\n", 10, 0xFFFF);
+			 // show screen and wait a moment
+			 writeState("GAME OVER", ST7735_BLUE);
+			 HAL_Delay(3000);
+			 processState = ranking;
+			 break;
 		 case gameWon:
-		 //SHOW SCREEN
-		 break;
+			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Game Won\n", 9, 0xFFFF);
+			 writeState("YOU WON", ST7735_BLUE); // show screen
+			 processState = ranking;
+			 break;
 		 case ranking:
-		 // show screen and wait a moment
-		 processState = init;
-		 break;
+			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Ranking\n", 8, 0xFFFF);
+			 // show screen and wait a moment
+			 processState = init;
+			 break;
 		 case testMode:
 			 break;
 		 }
@@ -183,32 +187,35 @@ void Looper::runGame() {
 //	while (gameRunning) {
 		switch (gameState) {
 		case startGame:
-			stateStartGame();				// Spielfeld gezeichnet, Nächster Block definiert, Variablen zurückgesetzt
+			HAL_UART_Transmit(&huart3,(const uint8_t*)"Start Game\n", 11, 0xFFFF);
+			stateStartGame();		// Spielfeld gezeichnet, Nächster Block definiert, Variablen zurückgesetzt
 			gameState = idle;
 			break;
 		case generateNewBlock:
+			//HAL_UART_Transmit(&huart3,(const uint8_t*)"Generate blocks\n", 16, 0xFFFF);
 			stateNewBlock();
 			gameState = spawnblock; // insert new Block => Checkt ob Block platziert werden kann
 			break;
 		case blockDown:
-			//
+			HAL_UART_Transmit(&huart3,(const uint8_t*)"Block down\n", 12, 0xFFFF);
 			stateBlockDown();
 			gameState = idle;
 			break;
 		case moveBlock:
+			HAL_UART_Transmit(&huart3,(const uint8_t*)"Move block\n", 11, 0xFFFF);
 			stateMoveBlock(buttonPressed);
 			gameState = idle;
 			break;
-
 		case rotateBlock:
+			HAL_UART_Transmit(&huart3,(const uint8_t*)"Rotate block\n", 12, 0xFFFF);
 			stateRotateBlock();
 			gameState = idle;
 			break;
-
 		case idle:
 			changeStateIdle();
 			break;
 		case fixBlock:
+			HAL_UART_Transmit(&huart3,(const uint8_t*)"fix block\n", 11, 0xFFFF);
 			stateFixBlock();
 			// CHECK IN MULTIPLAYER MODE HOW MANY PLAYERS REMAIN
 			if (false) {  // check in MP mode
@@ -221,6 +228,7 @@ void Looper::runGame() {
 			}
 			break;
 		case killLine:
+			HAL_UART_Transmit(&huart3,(const uint8_t*)"Kill line\n", 10, 0xFFFF);
 			// check all lines & kill line and move Lines above
 			stateKillLine();
 			// change state
@@ -232,6 +240,7 @@ void Looper::runGame() {
 			}
 			break;
 		case insertLine:
+			HAL_UART_Transmit(&huart3,(const uint8_t*)"Insert line\n", 12, 0xFFFF);
 			// CHECK HOW MANY LINES
 
 			playground.insertLine(calculations.getRdmSpaceInNewLine());
@@ -243,11 +252,13 @@ void Looper::runGame() {
 			}
 			break;
 		case spawnblock:
+			HAL_UART_Transmit(&huart3,(const uint8_t*)"Spawn block\n", 12, 0xFFFF);
 			//Check if new Block can be spawn or if colision
 			stateSpawnBlock();
 
 			break;
 		case updateScreen:
+			//HAL_UART_Transmit(&huart3,(const uint8_t*)"Update screen\n", 14, 0xFFFF);
 			//Check if new Block can be spawn or if colision
 			stateUpdateScreen();
 
@@ -264,12 +275,27 @@ void Looper::generateBlocks() {
 	}
 }
 
+// Loop in this method until buttons are released
+void Looper::btnReleased() {
+	while ((buttons & TFTSHIELD_BUTTON_3) == 0) {
+		// wait until button is released
+		buttons = ss.readButtons();
+	}
+	HAL_UART_Transmit(&huart3,(const uint8_t*)"Btn released\n", 13, 0xFFFF);
+}
+
+/*
+ * Action in states
+ */
 // TO DO, SET LEVEL, MULTIPLAYER
 void Looper::stateStartGame() {
 	blockDownCnt = INIT_BLOCK_DOWN_CNT;
 	score = 0;
 	killedLines = 0;
 	blocksInGame = 0;
+	for(uint8_t i = 0; i<=7;i++){
+		blocksPerTypeInGame[i] = 0;
+	}
 	srand(time(0));
 	generateBlocks(); // Hier gibt es bei mir einen HARDFAULT?? (Sven)
 	setUpField(); 	// TFT fct
@@ -283,6 +309,8 @@ void Looper::stateStartGame() {
 // increase the "pointer" with the current and next block or goes to zero
 void Looper::stateNewBlock() {
 	blocksInGame++;
+	uint8_t tmpBlockType = playBlocks[currentBlockNo].getBlockType();
+	blocksPerTypeInGame[tmpBlockType]++;		// cnt up per block type
 	playBlocks[currentBlockNo].renewBlock(calculations.getRdmBlock());
 	currentBlockNo++;
 	if (currentBlockNo >= 5) {
@@ -369,10 +397,13 @@ void Looper::stateKillLine() {
 	for (uint8_t line = 0; line < 21; line++) {
 		if (playground.isLineFull(line)) {
 			playground.killLine(line);
-			score += 100 / counter;
+			score += 10000 / blockDownCnt;
+			blockDownCnt -= 50;
 			killedLines++;
+			writeScore(score, ST7735_BLUE);
 		}
 	}
+	HAL_UART_Transmit(&huart3,(const uint8_t*)score +'0', 10, 0xFFFF);
 }
 
 // state spawnblock
@@ -395,7 +426,7 @@ void Looper::stateSpawnBlock() {
 	return;
 }
 
-// changew state in blockDown state
+// change state in blockDown state
 //  TO DO, include push buttons
 /*void Looper::changeStateInBlockDown() {
 	if (true) {           // move block
@@ -434,6 +465,7 @@ void Looper::changeStateIdle() {
 				{
 					stateBlockDown();
 				}
+				btnReleased();
 				gameState = fixBlock;
 			}
 		} else {
@@ -500,11 +532,6 @@ void Looper::testFct() {
 		// PUSH BUTTON
 		playground.insertLine(3);
 
-		// PUSH BUTTON
-		calculations.getRdmBlock();
-
-		// PUSH BUTTON
-		calculations.getRdmSpaceInNewLine();
 
 		for (uint8_t i = 0; i < 210; i++) {
 			test.createGapSidePlaygrount(i);

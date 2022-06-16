@@ -20,26 +20,21 @@ Calculations::~Calculations() {
 
 // returns a rdm value between 1..7
 uint8_t Calculations::getRdmBlock(){
-	uint32_t test;
-	uint8_t test2;
- //   srand(HAL_GetTick());
-    test = rand();
-    test2 =((uint8_t)(test%7)) + 1;
-    return (((uint8_t)(test%7)) + 1);
+	uint8_t rdm;
+	for(uint8_t i = 0;i<5;i++){
+		rdm += rand()%11;
+	}
+	rdm += HAL_GetTick()%13;
+	return rdm%7+1;
 }
 
 // returns a rdm value between 0..9
 uint8_t Calculations::getRdmSpaceInNewLine(){ //uint16_t
-   // srand(time(NULL));
-
-/*    uint16 randomLine = 0;
-    for(uint8_t i=0; i<=9; i++)
-    {
-    	randomLine = (rand()%2);
-    	randomLine << 1;
-    }
-    return randomLine;*/
-
-    return (rand()%9); // devide through RAND_MAX/7
+	uint8_t rdm;
+	for(uint8_t i = 0;i<5;i++){
+		rdm += rand()%11;
+	}
+	rdm += HAL_GetTick()%13;
+    return rdm%9; // devide through RAND_MAX/7
 }
 

@@ -89,6 +89,7 @@ void Playground::rstPlayground() {
 	for (uint8_t i = 0; i < sizeof(fields); i++) {
 		fields[i] = 0;
 	}
+	//
 }
 
 // Kill the line and move all blocks above one field down
@@ -203,7 +204,7 @@ bool Playground::isSpaceRight(uint8_t *blockArray) {
 // block array as pointer
 bool Playground::isSpaceLeft(uint8_t *blockArray) { // playground as pointer and block as pointer
 	for (uint8_t i = 0; i < 4; i++) {
-		if (fields[*blockArray + 1]  != 0) {
+		if (fields[*blockArray - 1]  != 0) {
 			return false;
 		}
 		blockArray++;
@@ -214,17 +215,27 @@ bool Playground::isSpaceLeft(uint8_t *blockArray) { // playground as pointer and
 
 // Return is it possible to rotate
 bool Playground::canRotate(uint8_t *blockArrayRotated) { // playground as pointer and block as pointer
-	uint8_t origin = *blockArrayRotated % 10;
+	//uint8_t origin = *blockArrayRotated % 10;
+	uint8_t min = 9;
+	uint8_t max = 0;
 	for (uint8_t i = 0; i < 4; i++) {
 		// check for busy fields when block is rotated
-		if (fields[*blockArrayRotated] != 0)
-			return false;
+		if (fields[*blockArrayRotated] != 0) return false;
+
+		// Check for overflows, if the distance between the most left and right fiels > 4 then is an overflow
+		uint8_t tmpField = *blockArrayRotated%10;
+		if(tmpField < min) min = tmpField;
+		if(tmpField > max) max = tmpField;
+		if((max - min) > 4) return false;
+		/*
 		// check the right edge
 		if (origin > 5 && (*blockArrayRotated % 10) < 5)
 			return false;
 		// check the left edge
 		if (origin < 5 && (*blockArrayRotated % 10) > 5)
-			return false;
+			return false;*/
+
+		blockArrayRotated++;
 	}
 	return true;
 }

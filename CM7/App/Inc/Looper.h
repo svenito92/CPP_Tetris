@@ -59,7 +59,22 @@ public:
 
   enum BlockType
   {
-    empty = 0, spaghetti = 1, square = 2, invZ = 3, correctZ = 4, invL = 5, correctL = 6, pyramid = 7
+    empty = 0,
+	spaghetti = 1,
+	square = 2,
+	invZ = 3,
+	correctZ = 4,
+	invL = 5,
+	correctL = 6,
+	pyramid = 7
+  };
+
+  enum ButtonType{
+	  x = 0,
+	  right = 1,
+	  left = 2,
+	  down = 3,
+	  y = 4
   };
 
 private:
@@ -78,9 +93,9 @@ private:
 
   // timer and timer references
   uint32_t updateScreenTime = 51; // in ms
-  uint32_t moveBlockTimer = 50;	// in ms
+  uint32_t moveBlockTimer = 80;	// in ms
   const uint32_t INIT_BLOCK_DOWN_CNT = 1000; // 1000ms
-  uint8_t blockDownCnt = INIT_BLOCK_DOWN_CNT; // numbers of moves before move block one field down
+  uint32_t blockDownCnt = INIT_BLOCK_DOWN_CNT; // numbers of moves before move block one field down
   uint32_t timer;		// when timer "overflows" move block
   uint32_t counter;		// counts how often the move timer overflowed
   uint32_t updateScreenCounter;
@@ -91,6 +106,7 @@ private:
   //uint8_t scoreMultiplier = 1;	//aka. Level use blockLevel cnt
   uint8_t killedLines;
   uint16_t blocksInGame;
+  uint16_t blocksPerTypeInGame[7];
   bool gameRunning;
   // bool moveBlockOnBottom = true;
 
@@ -104,6 +120,7 @@ private:
   void initScreen();
   void runGame();
   void generateBlocks();
+  void btnReleased();
 
   // action in states
   void stateStartGame();

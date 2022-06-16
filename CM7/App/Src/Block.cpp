@@ -137,12 +137,14 @@ void Block::moveToBottom(uint8_t *fourColums) {
 
 // Rotates the Block in clockwise
 void Block::rotate() {
+	rotation++;
+	/*
 	uint8_t tmpRotation = rotation + 1;
 	uint8_t array[4];
 	originToArray(origin, array, tmpRotation, blockType);
 	if (!overflowRight(origin, array) && !overflowLeft(origin, array)) {
 		rotation++;
-	}
+	}*/
 }
 
 // Move block one field right
