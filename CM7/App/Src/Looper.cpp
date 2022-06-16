@@ -235,8 +235,10 @@ void Looper::runGame() {
 			if (playground.isOverflow()) {
 				finalizeGame();
 				processState = gameOver;
-			} else {
+			} else if(false){	// MULTI PLAYER INSERT NEW LINE
 				gameState = insertLine;
+			} else{
+				gameState = generateNewBlock;
 			}
 			break;
 		case insertLine:
@@ -272,6 +274,25 @@ void Looper::runGame() {
 void Looper::generateBlocks() {
 	for (uint8_t i = 0; i < 5; i++) {
 		playBlocks[i].renewBlock(calculations.getRdmBlock());
+	}
+}
+
+// Accelerate game after a killed line
+void Looper::accelerateGame(){
+	if(blockDownCnt > 200){
+		blockDownCnt -= 10;
+	}
+	else if (blockDownCnt > 100){
+		blockDownCnt -= 5;
+	}
+	else if(blockDownCnt > 50){
+		blockDownCnt -= 3;
+	}
+	else if(blockDownCnt > 10){
+		blockDownCnt -= 1;
+	}
+	else{
+
 	}
 }
 
@@ -398,7 +419,7 @@ void Looper::stateKillLine() {
 		if (playground.isLineFull(line)) {
 			playground.killLine(line);
 			score += 10000 / blockDownCnt;
-			blockDownCnt -= 50;
+			accelerateGame();
 			killedLines++;
 			writeScore(score, ST7735_BLUE);
 		}
