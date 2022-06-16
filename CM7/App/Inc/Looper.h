@@ -127,6 +127,7 @@ private:
   void runGame();
   void generateBlocks();
   void btnReleased();
+  void accelerateGame();
 
   // action in states
   void stateStartGame();
