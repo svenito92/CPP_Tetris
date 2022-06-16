@@ -85,6 +85,12 @@ private:
   // general
   Calculations calculations = Calculations();
   uint32_t buttons;
+  uint8_t buttonUpHold;
+  uint8_t buttonDownHold;
+  uint8_t buttonRightHold;
+  uint8_t buttonAHold;
+  uint8_t buttonCHold;
+
   Adafruit_TFTShield18 ss;
 
   // FSM
@@ -137,6 +143,7 @@ private:
   void changeStateIdle();
 
   void finalizeGame();
+  void holdButtons();
 
   // Test function
   void testFct();
