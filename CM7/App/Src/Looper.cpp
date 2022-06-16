@@ -519,7 +519,11 @@ void Looper::stateUpdateScreen() {
 	uint8_t fieldNo;
 
 	for (uint8_t i = 0; i < 4; i++) {
-		fieldNo = *pointerBlockPos;
+		if(*pointerBlockPos<10)
+		{
+			test = 0;
+		}
+		fieldNo = *pointerBlockPos-10;
 		unitedFieldData[fieldNo] = playBlocks[currentBlockNo].getBlockType();
 		pointerBlockPos++;
 	}
