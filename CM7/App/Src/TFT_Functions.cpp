@@ -92,6 +92,15 @@ uint8_t writeState(char *text, uint16_t color)
 
 }
 
+//
+uint8_t writeFourthLine(uint32_t moveDownCnt, uint16_t color){
+	char levelTxt[5] = {0,0,0,0,0};
+	uint32_t tmpLevel = 100000 / moveDownCnt;
+	sprintf(levelTxt, "%d", tmpLevel);
+	ST7735_DrawString_wS(0x0004, 0x0058, levelTxt, color, 2);
+	return 0;
+}
+
 uint8_t writeScore(uint32_t score, uint16_t color)
 {
 	char scoreTxt[10] = {0, 0, 0,0, 0, 0, 0, 0, 0, 0}; 							// Uint32_t gibt max. 10 stellen, topLine und botLine müssen 7 gross und
