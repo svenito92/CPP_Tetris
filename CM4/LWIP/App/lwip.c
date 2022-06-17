@@ -138,6 +138,7 @@ static void Ethernet_Link_Periodic_Handle(struct netif *netif)
 void MX_LWIP_Process(void)
 {
 /* USER CODE BEGIN 4_1 */
+//  struct netif *netif = &gnetif;
 /* USER CODE END 4_1 */
   ethernetif_input(&gnetif);
 
@@ -149,6 +150,9 @@ void MX_LWIP_Process(void)
   Ethernet_Link_Periodic_Handle(&gnetif);
 
 /* USER CODE BEGIN 4_3 */
+  struct dhcp * dhcp = netif_dhcp_data(&gnetif);
+  ethernetif_dhcp_state = dhcp->state;
+
 /* USER CODE END 4_3 */
 }
 
@@ -162,11 +166,16 @@ static void ethernet_link_status_updated(struct netif *netif)
   if (netif_is_up(netif))
   {
 /* USER CODE BEGIN 5 */
+    char ip[20];
+    ip4addr_ntoa_r(&netif->ip_addr, ip, 20);
+    printf("LWIP: Network is up! IP Addr = %s\n", ip);
+
 /* USER CODE END 5 */
   }
   else /* netif is down */
   {
 /* USER CODE BEGIN 6 */
+    printf("LWIP: Network is down!\n");
 /* USER CODE END 6 */
   }
 }

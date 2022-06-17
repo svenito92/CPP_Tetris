@@ -117,7 +117,7 @@ ETH_DMADescTypeDef DMATxDscrTab[ETH_TX_DESC_CNT] __attribute__((section(".TxDecr
 #endif
 
 /* USER CODE BEGIN 2 */
-
+volatile uint8_t ethernetif_dhcp_state = 0;
 /* USER CODE END 2 */
 
 /* Global Ethernet handle */

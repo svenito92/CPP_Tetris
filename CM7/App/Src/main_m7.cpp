@@ -21,10 +21,12 @@
 #endif
 
 void bootSystem(void);
+void setupExternalInterrupts(void);
 
 int main(void)
 {
   bootSystem();
+  setupExternalInterrupts();
 
   /* Initialize all peripherals */
   MX_GPIO_Init();
@@ -33,13 +35,17 @@ int main(void)
   MX_I2C1_Init();
   MX_SPI5_Init();
 
+  printf("Hello from M7!\n");
+
 #ifndef DEBUG_M4_ONLY // Used to exclude M7 from running game to help debug M4 Core
   Looper looper = Looper();
   looper.run();
 #endif
   while (1)
   {
-
+    /* This is where the interrupt would be generated. */
+    HAL_EXTI_GenerateSWInterrupt(EXTI_LINE1);
+    HAL_Delay(1000);
   }
 }
 
@@ -76,3 +82,21 @@ void bootSystem(void)
   }
 }
 
+void setupExternalInterrupts(void)
+{
+  // Setup incoming interrupt EXTI0
+  HAL_EXTI_EdgeConfig( EXTI_LINE0, EXTI_RISING_EDGE);
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0xFU, 0U);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
+  // Setup outgoing Interrupt EXTI1
+  HAL_EXTI_D1_EventInputConfig(EXTI_LINE1, EXTI_MODE_IT, DISABLE);
+  HAL_EXTI_D2_EventInputConfig(EXTI_LINE1, EXTI_MODE_IT, ENABLE);
+}
+
+void EXTI0_IRQHandler(uint16_t GPIO_Pin)
+{
+  printf("Main M7: HAL_GPIO_EXTI_Callback()\n");
+  UNUSED(GPIO_Pin);
+  HAL_EXTI_D1_ClearFlag( EXTI_LINE0);
+}
