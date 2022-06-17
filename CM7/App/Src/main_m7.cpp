@@ -35,6 +35,7 @@ int main(void)
   MX_I2C1_Init();
   MX_SPI5_Init();
 
+
   printf("Hello from M7!\n");
 
 #ifndef DEBUG_M4_ONLY // Used to exclude M7 from running game to help debug M4 Core
@@ -63,6 +64,7 @@ void bootSystem(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
+  MPU_Config_ext();
 
   /* Configure the system clock */
   SystemClock_Config();

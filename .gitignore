@@ -11,13 +11,16 @@
 !Common/Intercom/*.cpp
 !Common/Intercom/*.h
 
-# Keep CM4 App files
+# Keep CM4 App and main files
 !/CM4
 !CM4/App
 !CM4/App/*
 !CM4/App/*/*.c
 !CM4/App/*/*.cpp
 !CM4/App/*/*.h
+!CM4/Core
+!CM4/Core/*
+!CM4/Core/*/main.*
 
 # Keep Libraries
 !/CM4
@@ -34,13 +37,16 @@
 !CM4/LWIP/*
 !CM4/LWIP/*/*
 
-# Keep CM7 App files
+# Keep CM7 App and main files
 !/CM7
 !CM7/App
 !CM7/App/*
 !CM7/App/*/*.c
 !CM7/App/*/*.cpp
 !CM7/App/*/*.h
+!CM7/Core
+!CM7/Core/*
+!CM7/Core/*/main.*
 
 # Keep Libraries
 !/CM7
@@ -50,3 +56,7 @@
 !CM7/App/Lib/*/*.c
 !CM7/App/Lib/*/*.cpp
 !CM7/App/Lib/*/*.h
+
+# Keep Linker files
+!CM7/STM32H745ZITX_FLASH.ld
+!CM4/STM32H745ZITX_FLASH.ld

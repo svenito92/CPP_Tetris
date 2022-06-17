@@ -5,13 +5,13 @@
  *      Author: Sven
  */
 
+#include <mqtt_intercom.h>
 #include "main.h"
 #include "usart.h"
 #include "gpio.h"
 #include "lwip.h"
-#include "intercom.h"
-
 #include "mqtt_m4.h"
+#include "mqtt_intercom.h"
 
 #define DHCP_STATE_BOUND  10
 
@@ -54,6 +54,8 @@ int main(void)
   mqtt_m4__subscribe("test_subscribe", 0);
   mqtt_m4__publish("tetris_publish", (uint8_t*) &host, sizeof(ip_addr_t), MQTT_M4__QOS_MAX_ONCE, MQTT_M4__NO_RETAIN);
 
+  mqtt_intercom__mem_init();
+
   while (1)
   {
     msTime = HAL_GetTick();
@@ -76,6 +78,7 @@ void bootSystem(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
+  MPU_Config_ext();
 }
 
 void setupExternalInterrupts(void)
