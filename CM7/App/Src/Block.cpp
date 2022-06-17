@@ -31,7 +31,7 @@ Block::~Block() {
 void Block::renewBlock(uint8_t type) {
 	Block::blockType = type;
 	if (type == 2) {
-		origin = 0x04;
+		origin = 14;
 	} else {
 		origin = FIRST_ORIGIN;
 	}
@@ -137,12 +137,14 @@ void Block::moveToBottom(uint8_t *fourColums) {
 
 // Rotates the Block in clockwise
 void Block::rotate() {
+	rotation++;
+	/*
 	uint8_t tmpRotation = rotation + 1;
 	uint8_t array[4];
 	originToArray(origin, array, tmpRotation, blockType);
 	if (!overflowRight(origin, array) && !overflowLeft(origin, array)) {
 		rotation++;
-	}
+	}*/
 }
 
 // Move block one field right

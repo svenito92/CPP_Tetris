@@ -42,7 +42,7 @@ public:
 	uint8_t getPreview(uint8_t *blockArray, uint8_t *previewArray);
 
 private:
-    uint8_t fields[209];
+    uint8_t fields[210];
     const uint8_t LINES = 21;
     const uint8_t ROWS = 10;
     const uint8_t MAX_FIELD_NO = ROWS * LINES - 1;

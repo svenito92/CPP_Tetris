@@ -29,7 +29,48 @@ void setUpField()
 
 }
 
+//
+uint8_t writeTopLine(char *text, uint16_t color){
+	uint8_t NrOfChar=0;
+	while(*text)
+	{
+		NrOfChar++;
+		text++;
+	}
+	text = text-NrOfChar;
+	if(NrOfChar>10)
+	{
+		return 0x01;
+	}
+	else
+	{
+		ST7735_DrawString_wS(0x0004, 0x0004, text, color, 2 );
+		return 0;
+	}
+}
 
+//
+uint8_t writeBtnMiddleLine(char *text, uint16_t color){
+	uint8_t NrOfChar=0;
+	while(*text)
+	{
+		NrOfChar++;
+		text++;
+	}
+	text = text-NrOfChar;
+	if(NrOfChar>10)
+	{
+		return 0x01;
+	}
+	else
+	{
+		ST7735_DrawString_wS(0x0004, 0x0022, text, color, 2 );
+		return 0;
+	}
+}
+
+
+// Max 8 chars
 uint8_t writeState(char *text, uint16_t color)
 {
 	uint8_t NrOfChar=0;
@@ -49,6 +90,15 @@ uint8_t writeState(char *text, uint16_t color)
 		return 0;
 	}
 
+}
+
+//
+uint8_t writeFourthLine(uint32_t moveDownCnt, uint16_t color){
+	char levelTxt[5] = {0,0,0,0,0};
+	uint32_t tmpLevel = 100000 / moveDownCnt;
+	sprintf(levelTxt, "%d", tmpLevel);
+	ST7735_DrawString_wS(0x0004, 0x0058, levelTxt, color, 2);
+	return 0;
 }
 
 uint8_t writeScore(uint32_t score, uint16_t color)
@@ -96,12 +146,12 @@ void setPreview(uint8_t block)
 			x = 0x0056;
 			y = 0x0008;
 			break;
-	case 3: setFields = 0x0630;		// S
+	case 3: setFields = 0x0360;		// S
 			color = ST7735_GREEN;
 			x = 0x005A;
 			y = 0x0008;
 			break;
-	case 4: setFields = 0x0360;		// Z
+	case 4: setFields = 0x0630;		// Z
 			color = ST7735_RED;
 			x = 0x005A;
 			y = 0x0008;
@@ -132,7 +182,10 @@ void setPreview(uint8_t block)
 
 void drawPreview(uint16_t x, uint16_t y, uint16_t setFields, uint16_t color)
 {
-
+	if(color != ST7735_CYAN && color !=ST7735_YELLOW)
+	{
+		ST7735_FillRectangle((0x0056), (0x0018), 0x0004, 0x0008, ST7735_BLACK);
+	}
 	for(uint8_t i = 0; i<=3; i++)
 	{
 		for(uint8_t u = 0; u<=3; u++)
@@ -148,7 +201,6 @@ void drawPreview(uint16_t x, uint16_t y, uint16_t setFields, uint16_t color)
 			setFields = setFields >> 1;
 		}
 	}
-
 }
 
 
@@ -194,6 +246,10 @@ uint16_t getColor(uint8_t color)
 	case 6:		retColor = ST7735_ORANGE;
 				break;
 	case 7:		retColor = ST7735_MAGENTA;
+				break;
+	case 8: 	retColor = ST7735_WHITE;
+				break;
+	case 9:		retColor = ST7735_LIGHTGREEN;
 				break;
 	default:	retColor = ST7735_BLACK;
 				break;
