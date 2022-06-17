@@ -49,8 +49,9 @@ void Looper::run() {
 
 				processState = gameSettingsSp;
 			 }
-			 else if (false)
+			 else if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_3))
 			 {
+				roleMenu = true;
 				processState = gameSettingsMp;
 			 }
 			 break;
@@ -66,6 +67,40 @@ void Looper::run() {
 			 }
 			 break;
 		 case gameSettingsMp:
+			 if(roleMenu){
+				 if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1))
+				 { // button pushed
+					btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
+					roleMenu = false;
+					role = 1;
+					playerNr=0;
+				 }
+				 else if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_3))
+				 {
+					btnReleased((uint32_t)TFTSHIELD_BUTTON_3);
+					roleMenu = false;
+					role = 2;
+				 }
+			 }
+			 else{
+				 if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_RIGHT))
+				 { // button pushed
+					//btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
+					if(playerNr <255){
+						playerNr++;
+					}
+					HAL_Delay(300);
+				 }
+				 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_LEFT)){
+						if(playerNr > 1){									// Player 0  is Master
+							playerNr--;
+						}
+						HAL_Delay(300);
+				 }
+				 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_LEFT)){
+					 processState = multiPlayer;
+				 }
+			 }
 			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"Settings MP\n", 12, 0xFFFF);
 			 //implement see single player and add mp parameters
 			 break;
@@ -238,8 +273,8 @@ void Looper::accelerateGame(){
 }
 
 // Loop in this method until buttons are released
-void Looper::btnReleased() {
-	while ((buttons & TFTSHIELD_BUTTON_3) == 0) {
+void Looper::btnReleased( uint32_t pressedButton) {
+	while ((buttons & pressedButton) == 0) {
 		// wait until button is released
 		buttons = ss.readButtons();
 	}

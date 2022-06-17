@@ -108,13 +108,17 @@ private:
   uint32_t updateScreenCounter;
   uint8_t buttonPressed;
 
-  // game controll
+  // game control
   uint16_t score = 0;
   //uint8_t scoreMultiplier = 1;	//aka. Level use blockLevel cnt
   uint8_t killedLines;
   uint16_t blocksInGame;
   uint16_t blocksPerTypeInGame[7];
   bool gameRunning;
+  uint8_t role;
+  bool roleMenu;
+  uint8_t playerNr = 1;
+
   // bool moveBlockOnBottom = true;
 
   // blocks & playgrounds
@@ -123,11 +127,12 @@ private:
   uint8_t currentBlockNo = 0;
   uint8_t nextBlockNo = 1;
 
+
   // Methods
   void initScreen();
   void runGame();
   void generateBlocks();
-  void btnReleased();
+  void btnReleased(uint32_t pressedButton);
   void accelerateGame();
 
   // action in states
