@@ -86,7 +86,7 @@ uint8_t writeState(char *text, uint16_t color)
 	}
 	else
 	{
-		ST7735_DrawString_wS(0x0004, 0x0040, text, color, 2 );
+		ST7735_DrawString_wS(0x0004, 0x0049, text, color, 2 );
 		return 0;
 	}
 
@@ -96,11 +96,20 @@ uint8_t writeState(char *text, uint16_t color)
 uint8_t writeFourthLine(uint32_t moveDownCnt, uint16_t color){
 	char levelTxt[5] = {0,0,0,0,0};
 	uint32_t tmpLevel = 100000 / moveDownCnt;
-	sprintf(levelTxt, "%d", tmpLevel);
-	ST7735_DrawString_wS(0x0004, 0x0058, levelTxt, color, 2);
+	//if(tmpLevel < 100){
+	//	ST7735_FillRectangle(0x0019, 0x0060, 0x0020, 0x0018, ST7735_BLACK);
+	//}
+	if(tmpLevel < 100){
+		sprintf(levelTxt, "0%d", tmpLevel);
+	}
+	else{
+		sprintf(levelTxt, "%d", tmpLevel);
+	}
+	ST7735_DrawString_wS(0x0004, 0x007 , levelTxt, color, 2);
 	return 0;
 }
 
+// Show score in game
 uint8_t writeScore(uint32_t score, uint16_t color)
 {
 	char scoreTxt[10] = {0, 0, 0,0, 0, 0, 0, 0, 0, 0}; 							// Uint32_t gibt max. 10 stellen, topLine und botLine müssen 7 gross und
@@ -206,9 +215,9 @@ void drawPreview(uint16_t x, uint16_t y, uint16_t setFields, uint16_t color)
 
 void drawField(uint8_t * fieldData){
 
-static uint8_t oldFieldData[200] = { 0 };
-uint8_t counter = 0;
-uint16_t color=0;
+	static uint8_t oldFieldData[200] = { 0 };
+	uint8_t counter = 0;
+	uint16_t color=0;
 
 	for(uint8_t i = 0; i<=19; i++)
 	{

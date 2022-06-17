@@ -39,12 +39,13 @@ void Looper::run() {
 		 case selectGameModeBtnIn:
 			 if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1))
 			 { // button pushed
-				 btnReleased();
+				 btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
 				 processState = gameSettingsSpSetScreen;
 			 }
 			 else if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_3))
 			 {
 				roleMenu = true;
+				btnReleased((uint32_t)TFTSHIELD_BUTTON_3);
 				processState = gameSettingsMp;
 			 }
 			 HAL_Delay(500);
@@ -263,7 +264,7 @@ void Looper::accelerateGame(){
 }
 
 // Loop in this method until buttons are released
-void Looper::btnReleased( uint32_t pressedButton) {
+void Looper::btnReleased(uint32_t pressedButton) {
 	while ((buttons & pressedButton) == 0) {
 		// wait until button is released
 		buttons = ss.readButtons();
@@ -290,20 +291,22 @@ void Looper::stateSetLevelScreen(){
 	writeBtnMiddleLine("Level +", ST7735_RED);
 	writeState("Level -", ST7735_GREEN);
 	writeFourthLine(blockDownCnt, ST7735_BLUE);
-	HAL_Delay(500);
+
 }
 
 //
 void Looper::stateSetLevelLevel(){
 	writeFourthLine(blockDownCnt, ST7735_BLUE);
-	HAL_Delay(500);
+	//HAL_Delay(500);
 
 	if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1)){
 		processState = singlePlayer;
+		btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
 	}
 	else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_2)){
 		if(blockDownCnt > 200){
 			blockDownCnt -= 50;
+			btnReleased((uint32_t)TFTSHIELD_BUTTON_2);
 		}
 		else{
 
@@ -312,6 +315,7 @@ void Looper::stateSetLevelLevel(){
 	else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_3)){
 		if(blockDownCnt < 3000){
 			blockDownCnt += 50;
+			btnReleased((uint32_t) TFTSHIELD_BUTTON_3);
 		}
 		else{
 
@@ -363,23 +367,6 @@ void Looper::stateBlockDown() {
 
 	playBlocks[currentBlockNo].moveOneLineDown();
 	gameState = idle;
-	/*
-	 if (playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions()))
-	 {
-	 if ()
-	 { // block on bottom and fix block
-	 changeStateInBlockDown();
-	 }
-	 else
-	 {
-	 moveBlockOnBottom = false;
-	 }
-	 }
-	 else
-	 {
-	 playBlocks[currentBlockNo].moveOneLineDown();
-	 changeStateInBlockDown();
-	 }*/
 }
 
 // TO DO!!!!!!!!!!!! BUTTONS PUSHED, CHECK EDGE
@@ -466,20 +453,6 @@ void Looper::stateSpawnBlock() {
 }
 
 // change state in blockDown state
-//  TO DO, include push buttons
-/*void Looper::changeStateInBlockDown() {
-	if (true) {           // move block
-		gameState = moveBlock;
-	} else if (false)     // rotate
-	{
-		gameState = rotateBlock;
-	} else                // idle
-	{
-		gameState = idle;
-	}
-}*/
-
-// transitions in idle state
 void Looper::changeStateIdle() {
 
 
@@ -513,11 +486,11 @@ void Looper::changeStateIdle() {
 			if (playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions())){
 				gameState = fixBlock;
 			}
-		else{
+			else{
 				while(!(playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions()))){
-					stateBlockDown();
-				}
-//				btnReleased();
+				stateBlockDown();
+			}
+				btnReleased((uint32_t) TFTSHIELD_BUTTON_3);
 				gameState = fixBlock;
 			}
 		} else {
