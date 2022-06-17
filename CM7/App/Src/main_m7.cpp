@@ -21,10 +21,12 @@
 #endif
 
 void bootSystem(void);
+void setupExternalInterrupts(void);
 
 int main(void)
 {
   bootSystem();
+  setupExternalInterrupts();
 
   /* Initialize all peripherals */
   MX_GPIO_Init();
@@ -39,7 +41,11 @@ int main(void)
 #endif
   while (1)
   {
-
+    /* This is where the interrupt would be generated. */
+    HAL_EXTI_D1_EventInputConfig(EXTI_LINE0 , EXTI_MODE_IT, DISABLE);
+    HAL_EXTI_D2_EventInputConfig(EXTI_LINE0 , EXTI_MODE_IT, ENABLE);
+    HAL_EXTI_GenerateSWInterrupt(EXTI_LINE0);
+    HAL_Delay(1000);
   }
 }
 
@@ -76,3 +82,19 @@ void bootSystem(void)
   }
 }
 
+void setupExternalInterrupts(void)
+{
+  /* AIEC Common configuration: make CPU1 and CPU2 SWI line1 sensitive to
+  rising edge. */
+  HAL_EXTI_EdgeConfig( EXTI_LINE0, EXTI_RISING_EDGE );
+  /* Interrupt used for M7 to M4 notifications. */
+  HAL_NVIC_SetPriority( EXTI1_IRQn, 0xFU, 0U );
+  HAL_NVIC_EnableIRQ( EXTI1_IRQn );
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  printf("Main M7: HAL_GPIO_EXTI_Callback()\n");
+  UNUSED(GPIO_Pin);
+  HAL_EXTI_D1_ClearFlag( EXTI_LINE1 );
+}

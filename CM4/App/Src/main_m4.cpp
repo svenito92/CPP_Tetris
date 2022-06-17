@@ -19,13 +19,15 @@
 #define HSEM_ID_0 (0U) /* HW semaphore 0*/
 #endif
 
-void bootSystem(void);
+static void bootSystem(void);
+static void setupExternalInterrupts(void);
 
 volatile uint32_t msTime;
 
 int main(void)
 {
   bootSystem();
+  setupExternalInterrupts();
 
   /* Initialize all peripherals */
   MX_GPIO_Init();
@@ -75,4 +77,24 @@ void bootSystem(void)
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 }
+
+void setupExternalInterrupts(void)
+{
+  /* AIEC Common configuration: make CPU1 and CPU2 SWI line1 sensitive to
+  rising edge. */
+  HAL_EXTI_EdgeConfig( EXTI_LINE1, EXTI_RISING_EDGE );
+  /* Interrupt used for M7 to M4 notifications. */
+  HAL_NVIC_SetPriority( EXTI0_IRQn, 0xFU, 0U );
+  HAL_NVIC_EnableIRQ( EXTI0_IRQn );
+
+}
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  printf("Main M4: HAL_GPIO_EXTI_Callback()\n");
+  UNUSED(GPIO_Pin);
+  HAL_EXTI_D2_ClearFlag( EXTI_LINE0 );
+}
+
 
