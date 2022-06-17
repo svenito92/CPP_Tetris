@@ -465,7 +465,7 @@ void Looper::changeStateIdle() {
 //		LCD_CS0;
 		counter++;
 //		LCD_CS1;
-		if ((((buttons&TFTSHIELD_BUTTON_UP)==0)&& buttonUpHold==0)||(((buttons&TFTSHIELD_BUTTON_RIGHT)==0)&& buttonRightHold==0)||(((buttons&TFTSHIELD_BUTTON_DOWN)==0))&& buttonDownHold==0) {                //BUTTON          //move block Joystick
+		if ((((buttons&TFTSHIELD_BUTTON_UP)==0)&& (buttonUpHold==0))||(((buttons&TFTSHIELD_BUTTON_RIGHT)==0)&& (buttonRightHold==0))||((((buttons&TFTSHIELD_BUTTON_DOWN)==0))&& (buttonDownHold==0))) {                //BUTTON          //move block Joystick
 			if((buttons&TFTSHIELD_BUTTON_UP)==0 && buttonUpHold==0){
 				buttonPressed=1;
 				buttonUpHold = 1;
@@ -516,7 +516,7 @@ void Looper::changeStateIdle() {
 // update Screen in Blocking State
 void Looper::stateUpdateScreen() {
 
-	uint8_t unitedFieldData[200]={0}, test;
+	uint8_t unitedFieldData[200]={0};
 
 	for(uint8_t i=0;i<=199; i++)
 	{
@@ -527,16 +527,11 @@ void Looper::stateUpdateScreen() {
 	uint8_t fieldNo;
 
 	for (uint8_t i = 0; i < 4; i++) {
-		if(*pointerBlockPos<10)
-		{
-			test = 0;
-		}
 		fieldNo = *pointerBlockPos-10;
 		unitedFieldData[fieldNo] = playBlocks[currentBlockNo].getBlockType();
 		pointerBlockPos++;
 	}
 	drawField(unitedFieldData);
-	test = playBlocks[nextBlockNo].getBlockType();
 	setPreview(playBlocks[nextBlockNo].getBlockType());
 	gameState = idle;
 }
