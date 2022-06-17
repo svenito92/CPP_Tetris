@@ -49,7 +49,7 @@ void Looper::run() {
 				role = 0;
 				processState = gameSettingsMpDrawScreen;
 			 }
-			 HAL_Delay(200);
+			 //HAL_Delay(200);
 			 break;
 		 case gameSettingsSpSetScreen:
 			 stateSetLevelScreen();
@@ -304,8 +304,9 @@ void Looper::stateDrawMpScreen(){
 	else{
 		char StringPlNr[3] = {0, 0, 0};
 //		ST7735_FillScreen(ST7735_BLACK);
-		writeTopLine("Set PlNr", ST7735_CYAN);
+		writeTopLine("Set Pl Nr", ST7735_CYAN);
 		sprintf(StringPlNr, "%d", playerNr);
+		ST7735_FillRectangle(0x0004, 0x0022, 50, 16, ST7735_BLACK);
 		writeBtnMiddleLine(StringPlNr, ST7735_RED);
 		HAL_Delay(300);
 	}
@@ -339,17 +340,32 @@ void Looper::stateSetMpSettings(){
 				playerNr++;
 			}
 			processState = gameSettingsMpDrawScreen;
-			HAL_Delay(300);
+			HAL_Delay(200);
 		 }
 		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_RIGHT)){
 			if(playerNr > 1){									// Player 0  is Master
 				playerNr--;
 			}
 			processState = gameSettingsMpDrawScreen;
-			HAL_Delay(300);
+			HAL_Delay(200);
+		 }
+		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_DOWN)){
+			if(playerNr > 10){									// Player 0  is Master
+				playerNr=playerNr-10;
+			}
+			processState = gameSettingsMpDrawScreen;
+			HAL_Delay(200);
+		 }
+		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_UP)){
+			if(playerNr < 246){									// Player 0  is Master
+				playerNr=playerNr+10;
+			}
+			processState = gameSettingsMpDrawScreen;
+			HAL_Delay(200);
 		 }
 		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_1)){
 			 processState = multiPlayer;
+			HAL_Delay(200);
 		 }
 	 }
 }
