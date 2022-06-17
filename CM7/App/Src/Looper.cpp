@@ -35,36 +35,26 @@ void Looper::run() {
 			 processState = selectGameModeSetScreen;
 			 break;
 		 case selectGameModeSetScreen:
-			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Select GameMode\n", 16, 0xFFFF);
-			 ST7735_FillScreen(ST7735_BLACK);
-			 writeState("Multi Game", ST7735_BLUE);// Show screen
-			 writeTopLine("Single Pl", ST7735_BLUE);// Show screen
-			 processState = selectGameModeBtnIn;
+			 stateSetGameMode();
 		 case selectGameModeBtnIn:
-			 //HAL_Delay(500);
-			 // change state
-			 //gameState = startGame;
 			 if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1))
 			 { // button pushed
-
-				processState = gameSettingsSp;
+				 btnReleased();
+				 processState = gameSettingsSpSetScreen;
 			 }
 			 else if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_3))
 			 {
 				roleMenu = true;
 				processState = gameSettingsMp;
 			 }
+			 HAL_Delay(500);
 			 break;
-		 case gameSettingsSp:
-			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"Settings SP\n", 12, 0xFFFF);
-			 // Show screen, set start level aso.
-
-			 writeState("PRESS A TO START THE GAME", ST7735_BLUE);
-			 // Start game
-			 if (true)
-			 { // button pushed
-			 processState = singlePlayer;
-			 }
+		 case gameSettingsSpSetScreen:
+			 stateSetLevelScreen();
+			 processState = gameSettingsSPSetLevel;
+			break;
+		 case gameSettingsSPSetLevel:
+			 stateSetLevelLevel();
 			 break;
 		 case gameSettingsMp:
 			 if(roleMenu){
@@ -256,13 +246,13 @@ void Looper::generateBlocks() {
 // Accelerate game after a killed line
 void Looper::accelerateGame(){
 	if(blockDownCnt > 200){
-		blockDownCnt -= 10;
+		blockDownCnt -= 50;
 	}
 	else if (blockDownCnt > 100){
-		blockDownCnt -= 5;
+		blockDownCnt -= 10;
 	}
 	else if(blockDownCnt > 50){
-		blockDownCnt -= 3;
+		blockDownCnt -= 5;
 	}
 	else if(blockDownCnt > 10){
 		blockDownCnt -= 1;
@@ -284,6 +274,54 @@ void Looper::btnReleased( uint32_t pressedButton) {
 /*
  * Action in states
  */
+//
+void Looper::stateSetGameMode(){
+	HAL_UART_Transmit(&huart3, (const uint8_t*) "Select GameMode\n", 16, 0xFFFF);
+	ST7735_FillScreen(ST7735_BLACK);
+	writeTopLine("Single Pl", ST7735_BLUE);			// Show screen
+	writeState("Multi Game", ST7735_BLUE);			// Show screen
+	processState = selectGameModeBtnIn;
+}
+
+//
+void Looper::stateSetLevelScreen(){
+	ST7735_FillScreen(ST7735_BLACK);
+	writeTopLine("Start", ST7735_CYAN);
+	writeBtnMiddleLine("Level +", ST7735_RED);
+	writeState("Level -", ST7735_GREEN);
+	writeFourthLine(blockDownCnt, ST7735_BLUE);
+	HAL_Delay(500);
+}
+
+//
+void Looper::stateSetLevelLevel(){
+	writeFourthLine(blockDownCnt, ST7735_BLUE);
+	HAL_Delay(500);
+
+	if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1)){
+		processState = singlePlayer;
+	}
+	else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_2)){
+		if(blockDownCnt > 200){
+			blockDownCnt -= 50;
+		}
+		else{
+
+		}
+	}
+	else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_3)){
+		if(blockDownCnt < 3000){
+			blockDownCnt += 50;
+		}
+		else{
+
+		}
+	}
+}
+
+
+
+
 // TO DO, SET LEVEL, MULTIPLAYER
 void Looper::stateStartGame() {
 	blockDownCnt = INIT_BLOCK_DOWN_CNT;

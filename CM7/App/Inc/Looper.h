@@ -33,7 +33,8 @@ public:
     init = 0,
     selectGameModeSetScreen = 10,
 	selectGameModeBtnIn = 15,
-    gameSettingsSp = 20,
+    gameSettingsSpSetScreen = 20,
+	gameSettingsSPSetLevel = 25,
     gameSettingsMp = 30,
     singlePlayer = 40,
     multiPlayer = 50,
@@ -136,6 +137,9 @@ private:
   void accelerateGame();
 
   // action in states
+  void stateSetGameMode();
+  void stateSetLevelScreen();
+  void stateSetLevelLevel();
   void stateStartGame();
   void stateNewBlock();
   void stateBlockDown();

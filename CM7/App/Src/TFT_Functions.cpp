@@ -49,6 +49,26 @@ uint8_t writeTopLine(char *text, uint16_t color){
 	}
 }
 
+//
+uint8_t writeBtnMiddleLine(char *text, uint16_t color){
+	uint8_t NrOfChar=0;
+	while(*text)
+	{
+		NrOfChar++;
+		text++;
+	}
+	text = text-NrOfChar;
+	if(NrOfChar>10)
+	{
+		return 0x01;
+	}
+	else
+	{
+		ST7735_DrawString_wS(0x0004, 0x0022, text, color, 2 );
+		return 0;
+	}
+}
+
 
 // Max 8 chars
 uint8_t writeState(char *text, uint16_t color)
@@ -70,6 +90,15 @@ uint8_t writeState(char *text, uint16_t color)
 		return 0;
 	}
 
+}
+
+//
+uint8_t writeFourthLine(uint32_t moveDownCnt, uint16_t color){
+	char levelTxt[5] = {0,0,0,0,0};
+	uint32_t tmpLevel = 100000 / moveDownCnt;
+	sprintf(levelTxt, "%d", tmpLevel);
+	ST7735_DrawString_wS(0x0004, 0x0058, levelTxt, color, 2);
+	return 0;
 }
 
 uint8_t writeScore(uint32_t score, uint16_t color)
