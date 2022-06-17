@@ -153,7 +153,10 @@ void setPreview(uint8_t block)
 
 void drawPreview(uint16_t x, uint16_t y, uint16_t setFields, uint16_t color)
 {
-
+	if(color != ST7735_CYAN && color !=ST7735_YELLOW)
+	{
+		ST7735_FillRectangle((0x0056), (0x0018), 0x0004, 0x0008, ST7735_BLACK);
+	}
 	for(uint8_t i = 0; i<=3; i++)
 	{
 		for(uint8_t u = 0; u<=3; u++)
@@ -169,7 +172,6 @@ void drawPreview(uint16_t x, uint16_t y, uint16_t setFields, uint16_t color)
 			setFields = setFields >> 1;
 		}
 	}
-
 }
 
 
