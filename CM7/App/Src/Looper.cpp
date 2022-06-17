@@ -44,12 +44,11 @@ void Looper::run() {
 			 }
 			 else if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_3))
 			 {
-				btnReleased((uint32_t)TFTSHIELD_BUTTON_3);
 				roleMenu = true;
-				role = 0;
-				processState = gameSettingsMpDrawScreen;
+				btnReleased((uint32_t)TFTSHIELD_BUTTON_3);
+				processState = gameSettingsMp;
 			 }
-			 //HAL_Delay(200);
+			 HAL_Delay(500);
 			 break;
 		 case gameSettingsSpSetScreen:
 			 stateSetLevelScreen();
@@ -58,16 +57,44 @@ void Looper::run() {
 		 case gameSettingsSPSetLevel:
 			 stateSetLevelLevel();
 			 break;
-		 case gameSettingsMpDrawScreen:
-			 stateDrawMpScreen();
-			 processState = gameSettingsMp;
-			break;
 		 case gameSettingsMp:
-			 stateSetMpSettings();
+			 if(roleMenu){
+				 if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1))
+				 { // button pushed
+					btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
+					roleMenu = false;
+					role = 1;
+					playerNr=0;
+				 }
+				 else if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_3))
+				 {
+					btnReleased((uint32_t)TFTSHIELD_BUTTON_3);
+					roleMenu = false;
+					role = 2;
+				 }
+			 }
+			 else{
+				 if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_RIGHT))
+				 { // button pushed
+					//btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
+					if(playerNr <255){
+						playerNr++;
+					}
+					HAL_Delay(300);
+				 }
+				 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_LEFT)){
+						if(playerNr > 1){									// Player 0  is Master
+							playerNr--;
+						}
+						HAL_Delay(300);
+				 }
+				 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_LEFT)){
+					 processState = multiPlayer;
+				 }
+			 }
 			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"Settings MP\n", 12, 0xFFFF);
 			 //implement see single player and add mp parameters
 			 break;
-
 		 case singlePlayer:
 			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"SP game\n", 8, 0xFFFF);
 			 runGame(); // singlePlayer as parameter
@@ -237,7 +264,7 @@ void Looper::accelerateGame(){
 }
 
 // Loop in this method until buttons are released
-void Looper::btnReleased( uint32_t pressedButton) {
+void Looper::btnReleased(uint32_t pressedButton) {
 	while ((buttons & pressedButton) == 0) {
 		// wait until button is released
 		buttons = ss.readButtons();
@@ -264,20 +291,22 @@ void Looper::stateSetLevelScreen(){
 	writeBtnMiddleLine("Level +", ST7735_RED);
 	writeState("Level -", ST7735_GREEN);
 	writeFourthLine(blockDownCnt, ST7735_BLUE);
-	HAL_Delay(500);
+
 }
 
 //
 void Looper::stateSetLevelLevel(){
 	writeFourthLine(blockDownCnt, ST7735_BLUE);
-	HAL_Delay(500);
+	//HAL_Delay(500);
 
 	if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1)){
 		processState = singlePlayer;
+		btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
 	}
 	else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_2)){
 		if(blockDownCnt > 200){
 			blockDownCnt -= 50;
+			btnReleased((uint32_t)TFTSHIELD_BUTTON_2);
 		}
 		else{
 
@@ -286,6 +315,7 @@ void Looper::stateSetLevelLevel(){
 	else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_3)){
 		if(blockDownCnt < 3000){
 			blockDownCnt += 50;
+			btnReleased((uint32_t) TFTSHIELD_BUTTON_3);
 		}
 		else{
 
@@ -293,82 +323,8 @@ void Looper::stateSetLevelLevel(){
 	}
 }
 
-//Writes Multiplayer Menu on Screen
-void Looper::stateDrawMpScreen(){
-	if(roleMenu){
-		ST7735_FillScreen(ST7735_BLACK);
-		writeTopLine("A: Host", ST7735_CYAN);
-		writeBtnMiddleLine("B: Player", ST7735_RED);
-		HAL_Delay(300);
-	}
-	else{
-		char StringPlNr[3] = {0, 0, 0};
-//		ST7735_FillScreen(ST7735_BLACK);
-		writeTopLine("Set Pl Nr", ST7735_CYAN);
-		sprintf(StringPlNr, "%d", playerNr);
-		ST7735_FillRectangle(0x0004, 0x0022, 50, 16, ST7735_BLACK);
-		writeBtnMiddleLine(StringPlNr, ST7735_RED);
-		HAL_Delay(300);
-	}
-}
-//Sets Multiplayer Settings
-void Looper::stateSetMpSettings(){
-	 if(roleMenu){
-		 if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1))
-		 { // button pushed
-			btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
-			roleMenu = false;
-			role = 1;
-			playerNr=0;
-			ST7735_FillScreen(ST7735_BLACK);
-			processState = gameSettingsMpDrawScreen;
-		 }
-		 else if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_2))
-		 {
-			btnReleased((uint32_t)TFTSHIELD_BUTTON_2);
-			roleMenu = false;
-			role = 2;
-			ST7735_FillScreen(ST7735_BLACK);
-			processState = gameSettingsMpDrawScreen;
-		 }
-	 }
-	 else{
-		 if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_LEFT))
-		 { // button pushed
-			//btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
-			if(playerNr <255){
-				playerNr++;
-			}
-			processState = gameSettingsMpDrawScreen;
-			HAL_Delay(200);
-		 }
-		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_RIGHT)){
-			if(playerNr > 1){									// Player 0  is Master
-				playerNr--;
-			}
-			processState = gameSettingsMpDrawScreen;
-			HAL_Delay(200);
-		 }
-		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_DOWN)){
-			if(playerNr > 10){									// Player 0  is Master
-				playerNr=playerNr-10;
-			}
-			processState = gameSettingsMpDrawScreen;
-			HAL_Delay(200);
-		 }
-		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_UP)){
-			if(playerNr < 246){									// Player 0  is Master
-				playerNr=playerNr+10;
-			}
-			processState = gameSettingsMpDrawScreen;
-			HAL_Delay(200);
-		 }
-		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_1)){
-			 processState = multiPlayer;
-			HAL_Delay(200);
-		 }
-	 }
-}
+
+
 
 // TO DO, SET LEVEL, MULTIPLAYER
 void Looper::stateStartGame() {
@@ -411,23 +367,6 @@ void Looper::stateBlockDown() {
 
 	playBlocks[currentBlockNo].moveOneLineDown();
 	gameState = idle;
-	/*
-	 if (playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions()))
-	 {
-	 if ()
-	 { // block on bottom and fix block
-	 changeStateInBlockDown();
-	 }
-	 else
-	 {
-	 moveBlockOnBottom = false;
-	 }
-	 }
-	 else
-	 {
-	 playBlocks[currentBlockNo].moveOneLineDown();
-	 changeStateInBlockDown();
-	 }*/
 }
 
 // TO DO!!!!!!!!!!!! BUTTONS PUSHED, CHECK EDGE
@@ -514,20 +453,6 @@ void Looper::stateSpawnBlock() {
 }
 
 // change state in blockDown state
-//  TO DO, include push buttons
-/*void Looper::changeStateInBlockDown() {
-	if (true) {           // move block
-		gameState = moveBlock;
-	} else if (false)     // rotate
-	{
-		gameState = rotateBlock;
-	} else                // idle
-	{
-		gameState = idle;
-	}
-}*/
-
-// transitions in idle state
 void Looper::changeStateIdle() {
 
 
@@ -561,11 +486,11 @@ void Looper::changeStateIdle() {
 			if (playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions())){
 				gameState = fixBlock;
 			}
-		else{
+			else{
 				while(!(playground.isOnBottom(playBlocks[currentBlockNo].getBlockPositions()))){
-					stateBlockDown();
-				}
-//				btnReleased();
+				stateBlockDown();
+			}
+				btnReleased((uint32_t) TFTSHIELD_BUTTON_3);
 				gameState = fixBlock;
 			}
 		} else {

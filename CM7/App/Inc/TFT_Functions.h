@@ -2,6 +2,10 @@
 
 #include "main.h"
 
+//variables
+//uint32_t oldLevelTFT = 0;
+
+// functions
 void setUpField();
 uint8_t writeTopLine(char *text, uint16_t color);
 uint8_t writeBtnMiddleLine(char *text, uint16_t color);
