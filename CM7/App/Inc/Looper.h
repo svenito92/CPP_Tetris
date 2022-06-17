@@ -36,6 +36,7 @@ public:
     gameSettingsSpSetScreen = 20,
 	gameSettingsSPSetLevel = 25,
     gameSettingsMp = 30,
+	gameSettingsMpDrawScreen = 31,
     singlePlayer = 40,
     multiPlayer = 50,
     gameOver = 60,
@@ -140,6 +141,8 @@ private:
   void stateSetGameMode();
   void stateSetLevelScreen();
   void stateSetLevelLevel();
+  void stateDrawMpScreen();
+  void stateSetMpSettings();
   void stateStartGame();
   void stateNewBlock();
   void stateBlockDown();
