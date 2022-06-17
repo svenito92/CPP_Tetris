@@ -84,19 +84,19 @@ void bootSystem(void)
 
 void setupExternalInterrupts(void)
 {
-  // Setup incoming interrupt EXTI0
-  HAL_EXTI_EdgeConfig( EXTI_LINE0, EXTI_RISING_EDGE);
-  HAL_NVIC_SetPriority(EXTI0_IRQn, 0xFU, 0U);
-  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-
-  // Setup outgoing Interrupt EXTI1
-  HAL_EXTI_D1_EventInputConfig(EXTI_LINE1, EXTI_MODE_IT, DISABLE);
-  HAL_EXTI_D2_EventInputConfig(EXTI_LINE1, EXTI_MODE_IT, ENABLE);
+//  // Setup incoming interrupt EXTI0
+//  HAL_EXTI_EdgeConfig( EXTI_LINE0, EXTI_RISING_EDGE);
+//  HAL_NVIC_SetPriority(EXTI0_IRQn, 0xFU, 0U);
+//  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+//
+//  // Setup outgoing Interrupt EXTI1
+//  HAL_EXTI_D1_EventInputConfig(EXTI_LINE1, EXTI_MODE_IT, DISABLE);
+//  HAL_EXTI_D2_EventInputConfig(EXTI_LINE1, EXTI_MODE_IT, ENABLE);
 }
 
-void EXTI0_IRQHandler(uint16_t GPIO_Pin)
-{
-  printf("Main M7: HAL_GPIO_EXTI_Callback()\n");
-  UNUSED(GPIO_Pin);
-  HAL_EXTI_D1_ClearFlag( EXTI_LINE0);
-}
+//void EXTI0_IRQHandler(uint16_t GPIO_Pin)
+//{
+//  printf("Main M7: HAL_GPIO_EXTI_Callback()\n");
+//  UNUSED(GPIO_Pin);
+//  HAL_EXTI_D1_ClearFlag( EXTI_LINE0);
+//}

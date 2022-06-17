@@ -4,6 +4,13 @@
 !.gitignore
 !CPP_Tetris.ioc
 
+# Keep Common files
+!/Common
+!Common/Intercom
+!Common/Intercom/*.c
+!Common/Intercom/*.cpp
+!Common/Intercom/*.h
+
 # Keep CM4 App files
 !/CM4
 !CM4/App
@@ -12,7 +19,7 @@
 !CM4/App/*/*.cpp
 !CM4/App/*/*.h
 
-#Keep Libraries
+# Keep Libraries
 !/CM4
 !CM4/App
 !CM4/App/Lib
@@ -35,7 +42,7 @@
 !CM7/App/*/*.cpp
 !CM7/App/*/*.h
 
-#Keep Libraries
+# Keep Libraries
 !/CM7
 !CM7/App
 !CM7/App/Lib

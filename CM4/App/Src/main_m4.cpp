@@ -9,6 +9,7 @@
 #include "usart.h"
 #include "gpio.h"
 #include "lwip.h"
+#include "intercom.h"
 
 #include "mqtt_m4.h"
 
@@ -17,6 +18,8 @@
 #ifndef HSEM_ID_0
 #define HSEM_ID_0 (0U) /* HW semaphore 0*/
 #endif
+
+#define HSEM_INTERCOM
 
 static void bootSystem(void);
 static void setupExternalInterrupts(void);
@@ -42,11 +45,6 @@ int main(void)
   {
     MX_LWIP_Process();
   }
-//  uint32_t timestamp = HAL_GetTick();
-//  while (HAL_GetTick() < timestamp + 10000)
-//  {
-//    MX_LWIP_Process();
-//  }
 
   ip_addr_t host;
   IP4_ADDR(&host, 10, 20, 30, 1);
@@ -82,20 +80,22 @@ void bootSystem(void)
 
 void setupExternalInterrupts(void)
 {
-  // Setup incoming interrupt EXTI1
-  HAL_EXTI_EdgeConfig( EXTI_LINE1, EXTI_RISING_EDGE);
-  HAL_NVIC_SetPriority(EXTI1_IRQn, 0xFU, 0U);
-  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
-
-  // Setup outgoing Interrupt EXTI0
-  HAL_EXTI_D1_EventInputConfig(EXTI_LINE0, EXTI_MODE_IT, DISABLE);
-  HAL_EXTI_D2_EventInputConfig(EXTI_LINE0, EXTI_MODE_IT, ENABLE);
+//  // Setup incoming interrupt EXTI1
+//  HAL_EXTI_EdgeConfig( EXTI_LINE1, EXTI_RISING_EDGE);
+//  HAL_NVIC_SetPriority(EXTI1_IRQn, 0xFU, 0U);
+//  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+//
+//  // Setup outgoing Interrupt EXTI0
+//  HAL_EXTI_D1_EventInputConfig(EXTI_LINE0, EXTI_MODE_IT, DISABLE);
+//  HAL_EXTI_D2_EventInputConfig(EXTI_LINE0, EXTI_MODE_IT, ENABLE);
+//
+//  __enable_irq();
 }
 
-void EXTI1_IRQHandler(uint16_t GPIO_Pin)
-{
-  printf("Main M4: HAL_GPIO_EXTI_Callback()\n");
-  UNUSED(GPIO_Pin);
-  HAL_EXTI_D2_ClearFlag( EXTI_LINE1);
-}
+//void EXTI1_IRQHandler(uint16_t GPIO_Pin)
+//{
+//  printf("Main M4: HAL_GPIO_EXTI_Callback()\n");
+//  UNUSED(GPIO_Pin);
+//  HAL_EXTI_D2_ClearFlag( EXTI_LINE1);
+//}
 
