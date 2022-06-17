@@ -37,13 +37,10 @@ void Looper::run() {
 		 case selectGameModeSetScreen:
 			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Select GameMode\n", 16, 0xFFFF);
 			 ST7735_FillScreen(ST7735_BLACK);
-			 writeState("Multi Game", ST7735_BLUE);// Show screen
 			 writeTopLine("Single Pl", ST7735_BLUE);// Show screen
+			 writeState("Multi Game", ST7735_BLUE);// Show screen
 			 processState = selectGameModeBtnIn;
 		 case selectGameModeBtnIn:
-			 //HAL_Delay(500);
-			 // change state
-			 //gameState = startGame;
 			 if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1))
 			 { // button pushed
 

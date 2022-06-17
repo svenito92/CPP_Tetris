@@ -49,6 +49,26 @@ uint8_t writeTopLine(char *text, uint16_t color){
 	}
 }
 
+//
+uint8_t writeBtnMiddleLine(char *text, uint16_t color){
+	uint8_t NrOfChar=0;
+	while(*text)
+	{
+		NrOfChar++;
+		text++;
+	}
+	text = text-NrOfChar;
+	if(NrOfChar>10)
+	{
+		return 0x01;
+	}
+	else
+	{
+		ST7735_DrawString_wS(0x0004, 0x0022, text, color, 2 );
+		return 0;
+	}
+}
+
 
 // Max 8 chars
 uint8_t writeState(char *text, uint16_t color)
