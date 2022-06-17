@@ -38,7 +38,7 @@ void Looper::run() {
 			 stateSetGameMode();
 		 case selectGameModeBtnIn:
 			 if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1))
-			 { // button pushed
+			 {
 				 btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
 				 processState = gameSettingsSpSetScreen;
 			 }
@@ -92,8 +92,7 @@ void Looper::run() {
 					 processState = multiPlayer;
 				 }
 			 }
-			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"Settings MP\n", 12, 0xFFFF);
-			 //implement see single player and add mp parameters
+			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Settings MP\n", 12, 0xFFFF);
 			 break;
 		 case singlePlayer:
 			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"SP game\n", 8, 0xFFFF);
@@ -286,6 +285,7 @@ void Looper::stateSetGameMode(){
 
 //
 void Looper::stateSetLevelScreen(){
+	HAL_UART_Transmit(&huart3, (const uint8_t*) "Set level SP\n", 13, 0xFFFF);
 	ST7735_FillScreen(ST7735_BLACK);
 	writeTopLine("Start", ST7735_CYAN);
 	writeBtnMiddleLine("Level +", ST7735_RED);
@@ -296,6 +296,7 @@ void Looper::stateSetLevelScreen(){
 
 //
 void Looper::stateSetLevelLevel(){
+	//HAL_UART_Transmit(&huart3, (const uint8_t*) "Set level SP2\n", 14, 0xFFFF);
 	writeFourthLine(blockDownCnt, ST7735_BLUE);
 	//HAL_Delay(500);
 
@@ -369,7 +370,7 @@ void Looper::stateBlockDown() {
 	gameState = idle;
 }
 
-// TO DO!!!!!!!!!!!! BUTTONS PUSHED, CHECK EDGE
+//
 void Looper::stateMoveBlock(uint8_t ButtonActive) {
 	// move possible
 	// do move
@@ -537,7 +538,6 @@ void Looper::stateUpdateScreen() {
 
 // Finalize game, change states and stop loop
 void Looper::finalizeGame() {
-//	gameRunning = false;
 	gameState = startGame;
 }
 

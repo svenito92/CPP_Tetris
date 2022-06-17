@@ -105,7 +105,7 @@ uint8_t writeFourthLine(uint32_t moveDownCnt, uint16_t color){
 	else{
 		sprintf(levelTxt, "%d", tmpLevel);
 	}
-	ST7735_DrawString_wS(0x0004, 0x007 , levelTxt, color, 2);
+	ST7735_DrawString_wS(0x0004, 0x0070 , levelTxt, color, 2);
 	return 0;
 }
 
