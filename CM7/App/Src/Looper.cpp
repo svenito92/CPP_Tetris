@@ -76,13 +76,13 @@ void Looper::run() {
 			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"SP game\n", 8, 0xFFFF);
 			 runGame(); // singlePlayer as parameter
 			 break;
-		 case initializeCom:
+		 case initializeComAndScreen:
 			 stateInitializeCom();
+			 stateWaitOnStartScreen();
 			 processState = waitOnStart;
 			 break;
 		 case waitOnStart:
 			 stateWaitOnStart();
-
 			 break;
 		 case multiPlayer:
 			 gameMode = 2;
@@ -376,6 +376,8 @@ void Looper::stateDrawMpScreen(){
 		sprintf(StringPlNr, "%d", playerNr);
 		ST7735_FillRectangle(0x0004, 0x0022, 50, 16, ST7735_BLACK);
 		writeBtnMiddleLine(StringPlNr, ST7735_RED);
+		writeLn("A: Set Nr", ST7735_CYAN, 80);
+		writeLn("C: Back", ST7735_CYAN, 110);
 		HAL_Delay(300);
 	}
 }
@@ -433,7 +435,7 @@ void Looper::stateSetMpSettings(){
 			HAL_Delay(200);
 		 }
 		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_1)){
-			 processState = initializeCom;
+			 processState = initializeComAndScreen;
 			HAL_Delay(200);
 		 }
 	 }
@@ -672,10 +674,21 @@ void Looper::stateUpdateScreen() {
 	gameState = idle;
 }
 
+void Looper::stateWaitOnStartScreen(){
+
+		ST7735_FillScreen(ST7735_BLACK);
+		writeLn("Wait on", ST7735_RED, 20);
+		writeLn("Start", ST7735_RED, 40);
+		writeLn("C: BACK", ST7735_RED, 80);
+		HAL_Delay(300);
+
+}
+
 void Looper::stateWaitOnStart(){
 	intercom_data_t *data;
 	if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_3)){
 		btnReleased((uint32_t)TFTSHIELD_BUTTON_3);
+		ST7735_FillScreen(ST7735_BLACK);
 		processState = 	gameSettingsMpDrawScreen;
 
 	}
