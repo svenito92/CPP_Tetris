@@ -19,8 +19,6 @@
 #define HSEM_ID_0 (0U) /* HW semaphore 0*/
 #endif
 
-#define HSEM_INTERCOM
-
 static void bootSystem(void);
 static void setupExternalInterrupts(void);
 
@@ -54,7 +52,7 @@ int main(void)
   mqtt_m4__subscribe("test_subscribe", 0);
   mqtt_m4__publish("tetris_publish", (uint8_t*) &host, sizeof(ip_addr_t), MQTT_M4__QOS_MAX_ONCE, MQTT_M4__NO_RETAIN);
 
-  mqtt_intercom__mem_init();
+  mqtt_intercom__init();
 
   while (1)
   {
@@ -101,4 +99,20 @@ void setupExternalInterrupts(void)
 //  UNUSED(GPIO_Pin);
 //  HAL_EXTI_D2_ClearFlag( EXTI_LINE1);
 //}
+
+void HAL_HSEM_FreeCallback(uint32_t SemMask)
+{
+  if(SemMask & __HAL_HSEM_SEMID_TO_MASK(HSEM_INTERCOM))
+  {
+    if(mqtt_intercom__state == INTERCOM_IDLE)
+    {
+      mqtt_intercom__receive();
+    }
+    else
+    {
+      printf("Intercom M4: Ack\n");
+    }
+  }
+}
+
 
