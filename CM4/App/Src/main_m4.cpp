@@ -81,6 +81,9 @@ void bootSystem(void)
 
 void setupExternalInterrupts(void)
 {
+  HAL_NVIC_SetPriority(HSEM1_IRQn, 0xFU, 0U);
+  HAL_NVIC_EnableIRQ(HSEM1_IRQn);
+
 //  // Setup incoming interrupt EXTI1
 //  HAL_EXTI_EdgeConfig( EXTI_LINE1, EXTI_RISING_EDGE);
 //  HAL_NVIC_SetPriority(EXTI1_IRQn, 0xFU, 0U);

@@ -12,6 +12,7 @@
 #include "usart.h"
 #include "usb_otg.h"
 #include "gpio.h"
+#include "mqtt_intercom.h"
 
 // App Includes
 #include "Looper.h"
