@@ -120,6 +120,7 @@ private:
   uint8_t role;
   bool roleMenu;
   uint8_t playerNr = 1;
+  uint16_t scoreRanking[10] = {9,8,7,6,5,4,3,2,1,0};
 
   // bool moveBlockOnBottom = true;
 
@@ -136,6 +137,7 @@ private:
   void generateBlocks();
   void btnReleased(uint32_t pressedButton);
   void accelerateGame();
+  void setNewScoreInRanking(uint16_t);
 
   // action in states
   void stateSetGameMode();
