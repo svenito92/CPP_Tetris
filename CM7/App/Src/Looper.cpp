@@ -334,11 +334,11 @@ void Looper::stateRanking(){
 	writeRanking(&scoreRanking[0]);
 	//HAL_UART_Transmit(&huart3, (const uint8_t*) "Ranking\n", 8, 0xFFFF);
 	// show screen and wait a moment
-	while(!((buttons & (uint32_t) TFTSHIELD_BUTTON_1)
-			|| (buttons & (uint32_t) TFTSHIELD_BUTTON_2)
-			|| (buttons & (uint32_t) TFTSHIELD_BUTTON_3))){
-
+	while((buttons & TFTSHIELD_BUTTON_1)!=0){
+		buttons = ss.readButtons();
+		HAL_UART_Transmit(&huart3, (const uint8_t*) "Wait 4 pushed btn\n", 18, 0xFFFF);
 	}
+	HAL_UART_Transmit(&huart3, (const uint8_t*) "Ranking end\n", 12, 0xFFFF);
 	processState = init;
 }
 void Looper::stateDrawMpScreen(){
