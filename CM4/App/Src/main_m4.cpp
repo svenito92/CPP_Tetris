@@ -81,8 +81,8 @@ void bootSystem(void)
 
 void setupExternalInterrupts(void)
 {
-  HAL_NVIC_SetPriority(HSEM1_IRQn, 0xFU, 0U);
-  HAL_NVIC_EnableIRQ(HSEM1_IRQn);
+  //HAL_NVIC_SetPriority(HSEM1_IRQn, 0xFU, 0U);
+  //HAL_NVIC_EnableIRQ(HSEM1_IRQn);
 
 //  // Setup incoming interrupt EXTI1
 //  HAL_EXTI_EdgeConfig( EXTI_LINE1, EXTI_RISING_EDGE);
@@ -105,6 +105,7 @@ void setupExternalInterrupts(void)
 
 void HAL_HSEM_FreeCallback(uint32_t SemMask)
 {
+  printf("HSEM M4: FreeCallback!\n");
   if(SemMask & __HAL_HSEM_SEMID_TO_MASK(HSEM_INTERCOM))
   {
       mqtt_intercom__hsem_it();
@@ -113,6 +114,7 @@ void HAL_HSEM_FreeCallback(uint32_t SemMask)
 
 void mqtt_intercom__receive_cb(intercom_data_t * data)
 {
+  printf("Intercom M4: Receive callback");
   // Interpret command
 }
 
