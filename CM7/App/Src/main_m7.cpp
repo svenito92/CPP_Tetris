@@ -102,3 +102,16 @@ void setupExternalInterrupts(void)
 //  UNUSED(GPIO_Pin);
 //  HAL_EXTI_D1_ClearFlag( EXTI_LINE0);
 //}
+
+void HAL_HSEM_FreeCallback(uint32_t SemMask)
+{
+  if(SemMask & __HAL_HSEM_SEMID_TO_MASK(HSEM_INTERCOM))
+  {
+      mqtt_intercom__hsem_it();
+  }
+}
+
+void mqtt_intercom__receive_cb(intercom_data_t * data)
+{
+  // Interpret command
+}

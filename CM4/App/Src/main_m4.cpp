@@ -104,15 +104,13 @@ void HAL_HSEM_FreeCallback(uint32_t SemMask)
 {
   if(SemMask & __HAL_HSEM_SEMID_TO_MASK(HSEM_INTERCOM))
   {
-    if(mqtt_intercom__state == INTERCOM_IDLE)
-    {
-      mqtt_intercom__receive();
-    }
-    else
-    {
-      printf("Intercom M4: Ack\n");
-    }
+      mqtt_intercom__hsem_it();
   }
+}
+
+void mqtt_intercom__receive_cb(intercom_data_t * data)
+{
+  // Interpret command
 }
 
 

@@ -91,7 +91,7 @@ void mqtt_m4__publish(const char *topic, uint8_t *buf, uint16_t len, uint8_t qos
 static void mqtt_m4__connection_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status)
 {
   printf("MQTT M4: mqtt_m4__connection_cb()\n");
-  err_t err = ERR_OK;
+//  err_t err = ERR_OK;
   if (status == MQTT_CONNECT_ACCEPTED)
   {
     printf("MQTT M4: Successfully connected\n");

@@ -44,7 +44,7 @@ typedef struct
 void mqtt_intercom__init(void);
 void mqtt_intercom__set_m4_ready(void);
 void mqtt_intercom__send(intercom_data_t *data);
-void mqtt_intercom__receive(void);
+void mqtt_intercom__hsem_it(void);
 void mqtt_intercom__receive_cb(intercom_data_t * data);
 
 extern volatile intercom_state_t mqtt_intercom__state;
