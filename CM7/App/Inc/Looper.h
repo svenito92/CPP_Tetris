@@ -143,6 +143,7 @@ private:
   void stateSetGameMode();
   void stateSetLevelScreen();
   void stateSetLevelLevel();
+  void stateRanking();
   void stateDrawMpScreen();
   void stateSetMpSettings();
   void stateStartGame();

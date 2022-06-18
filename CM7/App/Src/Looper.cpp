@@ -89,14 +89,7 @@ void Looper::run() {
 			 processState = ranking;
 			 break;
 		 case ranking:
-			 setNewScoreInRanking(score);
-			 writeFourthLine(score, ST7735_YELLOW);
-			 HAL_Delay(2000);
-			 writeRanking(&scoreRanking[0]);
-			 HAL_Delay(10000);
-			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Ranking\n", 8, 0xFFFF);
-			 // show screen and wait a moment
-			 processState = init;
+			 stateRanking();
 			 break;
 		 case testMode:
 			 break;
@@ -306,7 +299,7 @@ void Looper::stateSetLevelScreen(){
 //
 void Looper::stateSetLevelLevel(){
 	//HAL_UART_Transmit(&huart3, (const uint8_t*) "Set level SP2\n", 14, 0xFFFF);
-	writeFourthLine(10000/blockDownCnt, ST7735_BLUE);
+	writeFourthLine(100000/blockDownCnt, ST7735_BLUE);
 	//HAL_Delay(500);
 
 	if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1)){
@@ -333,6 +326,21 @@ void Looper::stateSetLevelLevel(){
 	}
 }
 
+//
+void Looper::stateRanking(){
+	setNewScoreInRanking(score);
+	writeFourthLine(score, ST7735_YELLOW);
+	HAL_Delay(5000);
+	writeRanking(&scoreRanking[0]);
+	//HAL_UART_Transmit(&huart3, (const uint8_t*) "Ranking\n", 8, 0xFFFF);
+	// show screen and wait a moment
+	while(!((buttons & (uint32_t) TFTSHIELD_BUTTON_1)
+			|| (buttons & (uint32_t) TFTSHIELD_BUTTON_2)
+			|| (buttons & (uint32_t) TFTSHIELD_BUTTON_3))){
+
+	}
+	processState = init;
+}
 void Looper::stateDrawMpScreen(){
 	if(roleMenu){
 		ST7735_FillScreen(ST7735_BLACK);
