@@ -131,7 +131,7 @@ private:
   uint8_t buttonPressed;
   uint8_t activePlayers=0;
   uint8_t gameMode=0; // 1 = Singelplayer, 2 = Multiplayer
-
+  bool gameWon=0;
 
   // bool moveBlockOnBottom = true;
 
@@ -153,7 +153,6 @@ private:
   void stateSetGameMode();
   void stateSetLevelScreen();
   void stateSetLevelLevel();
-  void stateRanking();
   void stateDrawMpScreen();
   void stateSetMpSettings();
   void stateStartGame();
