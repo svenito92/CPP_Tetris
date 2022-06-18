@@ -125,7 +125,7 @@ private:
   uint16_t blocksInGame;
   uint16_t blocksPerTypeInGame[7];
   bool gameRunning;
-  uint8_t role;
+  uint8_t role; // 1 = Master, 2 = Player
   bool roleMenu;
   uint8_t playerNr = 1;
   uint8_t buttonPressed;

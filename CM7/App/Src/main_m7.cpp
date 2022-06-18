@@ -119,7 +119,7 @@ void mqtt_intercom__receive_cb(intercom_data_t *data)
   printf("Intercom M7: Receive intercom command '%d'", data->cmd);
   // Interpret command
   HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
-#ifndef DEBUG_M4_ONLY // Used to exclude M7 from running game to help debug M4 Core
+//#ifndef DEBUG_M4_ONLY // Used to exclude M7 from running game to help debug M4 Core
   std::string topic = "test";
 
   switch (data->cmd)
@@ -146,5 +146,5 @@ void mqtt_intercom__receive_cb(intercom_data_t *data)
     break;
 
   }
-#endif
+//#endif
 }

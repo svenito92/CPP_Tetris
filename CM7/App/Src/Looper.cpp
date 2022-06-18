@@ -19,7 +19,7 @@ Looper::~Looper() {
 
 void Looper::run() {
 	//HAL_UART_Transmit(&huart3,(const uint8_t*)"Start run\n", 10, 0xFFFF);
-
+	intercom_data_t *gameOverWrite;
 	// init system, ethernet, screen, buttons
 	initScreen();
 //	intercom_data_t *test;
@@ -100,11 +100,11 @@ void Looper::run() {
 			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Game Won\n", 9, 0xFFFF);
 			 writeState("YOU WON", ST7735_BLUE); // show screen
 			if(gameMode == 2){
-				data->cmd = MQTT_PUBLISH;
-				sprintf((char*)&data->topic,"GameWon");
-				data->data_length = 1;
-				data->data[0] = playerNr;
-				mqtt_intercom__send(data);
+				gameOverWrite->cmd = MQTT_PUBLISH;
+				sprintf((char*)&gameOverWrite->topic,"GameWon");
+				gameOverWrite->data_length = 1;
+				gameOverWrite->data[0] = playerNr;
+				mqtt_intercom__send(gameOverWrite);
 			}
 			 processState = ranking;
 			 break;
@@ -175,7 +175,7 @@ void Looper::runGame() {
 			HAL_UART_Transmit(&huart3,(const uint8_t*)"fix block\n", 11, 0xFFFF);
 			stateFixBlock();
 			// CHECK IN MULTIPLAYER MODE HOW MANY PLAYERS REMAIN
-			if (activePlayers==0) {  // check in MP mode
+			if ((activePlayers==0) && (gameMode==2)) {  // check in MP mode
 				processState = gameWon;
 				finalizeGame();
 			}
@@ -546,17 +546,18 @@ void Looper::stateKillLine() {
 			writeScore(score, ST7735_BLUE);
 		}
 	}
-	oldKilledLines= killedLines-oldKilledLines+openKilledLines;
-	while(oldKilledLines!= 0){
-		if(oldKilledLines > activePlayers){
-			linesSend++;
-			oldKilledLines - activePlayers;
+	if(gameMode == 2){
+		oldKilledLines= killedLines-oldKilledLines+openKilledLines;
+		while(oldKilledLines!= 0){
+			if(oldKilledLines > activePlayers){
+				linesSend++;
+				oldKilledLines - activePlayers;
+			}
+			else{
+				openKilledLines = oldKilledLines;
+				oldKilledLines=0;
+			}
 		}
-		else{
-			openKilledLines = oldKilledLines;
-			oldKilledLines=0;
-		}
-	}
 
 	data->cmd = MQTT_PUBLISH;
 	sprintf((char*)&data->topic,"KillLine");
@@ -564,6 +565,7 @@ void Looper::stateKillLine() {
 	data->data[0] = playerNr;
 	data->data[1] = linesSend;
 	mqtt_intercom__send(data);
+	}
 	HAL_UART_Transmit(&huart3,(const uint8_t*)score +'0', 10, 0xFFFF);
 }
 
@@ -673,12 +675,24 @@ void Looper::stateUpdateScreen() {
 void Looper::stateWaitOnStart(){
 	intercom_data_t *data;
 	if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_3)){
+		btnReleased((uint32_t)TFTSHIELD_BUTTON_3);
 		processState = 	gameSettingsMpDrawScreen;
 
 	}
 	else if(gameStartFlag != 0){
 		processState = multiPlayer;
 
+	}
+	else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_1)){
+		btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
+		if(role == 1){
+			gameStartFlag =1;
+			data->cmd = MQTT_PUBLISH;
+			sprintf((char*)&data->topic,"StartGame");
+			data->data_length = 1;
+			data->data[0] = 1;
+			mqtt_intercom__send(data);
+		}
 	}
 	else{
 		processState = 	waitOnStart;
@@ -698,26 +712,26 @@ intercom_data_t *data;
 
 	if(interCoreComReady = true){
 		data->cmd = MQTT_SUBSCRIBE;
-		sprintf(data->topic,"StartGame");
+		sprintf((char*)&data->topic,"StartGame");
 		mqtt_intercom__send(data);
 		data->cmd = MQTT_SUBSCRIBE;
-		sprintf(data->topic,"Players");
+		sprintf((char*)&data->topic,"Players");
 		mqtt_intercom__send(data);
 		data->cmd = MQTT_SUBSCRIBE;
-		sprintf(data->topic,"KillLine");
+		sprintf((char*)&data->topic,"KillLine");
 		mqtt_intercom__send(data);
 		data->cmd = MQTT_SUBSCRIBE;
-		sprintf(data->topic,"GameOver");
+		sprintf((char*)&data->topic,"GameOver");
 		mqtt_intercom__send(data);
 		data->cmd = MQTT_SUBSCRIBE;
-		sprintf(data->topic,"GameWon");
+		sprintf((char*)&data->topic,"GameWon");
 		mqtt_intercom__send(data);
 	}
 }
 
 void Looper::stateGameOver(){
 	intercom_data_t *data;
-	if(gameMode = 2){	// Multiplayer
+	if(gameMode == 2){	// Multiplayer
 		if(HAL_GetTick()-gameOverUpdate >= 500) {
 			gameOverUpdate = HAL_GetTick();
 			data->cmd = MQTT_PUBLISH;
