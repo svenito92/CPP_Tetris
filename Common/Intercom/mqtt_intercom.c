@@ -58,6 +58,7 @@ void mqtt_intercom__hsem_it(void)
   else
   {
     // Acknowledge of successful send
+    mqtt_intercom__state = INTERCOM_IDLE;
   }
 }
 

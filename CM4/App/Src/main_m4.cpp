@@ -31,7 +31,7 @@ int main(void)
   /* Initialize all peripherals */
   MX_GPIO_Init();
   MX_USART3_UART_Init();
-  printf("Hello from M4!\n");
+  printf("Hello from M4! (%s)",__TIME__);
 
   setupExternalInterrupts();
 

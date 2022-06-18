@@ -22,44 +22,50 @@
 #endif
 
 void bootSystem(void);
-void setupExternalInterrupts(void);
 
 int main(void)
 {
   bootSystem();
-  setupExternalInterrupts();
+
 
   /* Initialize all peripherals */
   MX_GPIO_Init();
   MX_USART3_UART_Init();
+  printf("Hello from M7! (%s)\n",__TIME__);
+
   MX_USB_OTG_FS_PCD_Init();
   MX_I2C1_Init();
   MX_SPI5_Init();
 
+  printf("Wait 10s...\n");
+  HAL_Delay(10000);
+  printf("Done\n");
 
-  printf("Hello from M7!\n");
+  mqtt_intercom__init();
 
 #ifndef DEBUG_M4_ONLY // Used to exclude M7 from running game to help debug M4 Core
   Looper looper = Looper();
   looper.run();
 #endif
-  HAL_Delay(10000);
+
+
   intercom_data_t mqtt_data;
-  mqtt_data.cmd = MQTT_PUBLISH;
-  sprintf((char*)&mqtt_data.topic, "data_from_m7");
-  mqtt_data.data_length = 10;
-  uint32_t count = 0;
+  mqtt_data.cmd = MQTT_SUBSCRIBE;
+  sprintf((char*) &mqtt_data.topic, "data_to_m7");
+  mqtt_intercom__send(&mqtt_data);
+//  mqtt_data.data_length = 10;
+//  uint32_t count = 0;
   while (1)
   {
-    /* This is where the interrupt would be generated. */
-
-    count++;
-    sprintf((char*)&mqtt_data.data, "%0*ld", 10, count);
-
-    mqtt_intercom__send(&mqtt_data);
-//    while (HAL_HSEM_FastTake(HSEM_INTERCOM) != HAL_OK);
-//    HAL_HSEM_Release(HSEM_INTERCOM, 0);
-    HAL_Delay(5000);
+//    /* This is where the interrupt would be generated. */
+//
+//    count++;
+//    sprintf((char*)&mqtt_data.data, "%0*ld", 10, count);
+//
+//    mqtt_intercom__send(&mqtt_data);
+////    while (HAL_HSEM_FastTake(HSEM_INTERCOM) != HAL_OK);
+////    HAL_HSEM_Release(HSEM_INTERCOM, 0);
+//    HAL_Delay(5000);
   }
 }
 
@@ -97,36 +103,19 @@ void bootSystem(void)
   }
 }
 
-void setupExternalInterrupts(void)
-{
-//  // Setup incoming interrupt EXTI0
-//  HAL_EXTI_EdgeConfig( EXTI_LINE0, EXTI_RISING_EDGE);
-//  HAL_NVIC_SetPriority(EXTI0_IRQn, 0xFU, 0U);
-//  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-//
-//  // Setup outgoing Interrupt EXTI1
-//  HAL_EXTI_D1_EventInputConfig(EXTI_LINE1, EXTI_MODE_IT, DISABLE);
-//  HAL_EXTI_D2_EventInputConfig(EXTI_LINE1, EXTI_MODE_IT, ENABLE);
-}
-
-//void EXTI0_IRQHandler(uint16_t GPIO_Pin)
-//{
-//  printf("Main M7: HAL_GPIO_EXTI_Callback()\n");
-//  UNUSED(GPIO_Pin);
-//  HAL_EXTI_D1_ClearFlag( EXTI_LINE0);
-//}
-
 void HAL_HSEM_FreeCallback(uint32_t SemMask)
 {
   printf("HSEM M7: FreeCallback!\n");
-  if(SemMask & __HAL_HSEM_SEMID_TO_MASK(HSEM_INTERCOM))
+  if (SemMask & __HAL_HSEM_SEMID_TO_MASK(HSEM_INTERCOM))
   {
-      mqtt_intercom__hsem_it();
+    printf("Intercom M7: HSEM IT Callback\n");
+    mqtt_intercom__hsem_it();
   }
 }
 
-void mqtt_intercom__receive_cb(intercom_data_t * data)
+void mqtt_intercom__receive_cb(intercom_data_t *data)
 {
-  printf("Intercom M7: Receive callback");
+  printf("Intercom M7: Receive intercom command '%d'",data->cmd);
   // Interpret command
+  HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
 }
