@@ -43,12 +43,23 @@ int main(void)
   Looper looper = Looper();
   looper.run();
 #endif
+  HAL_Delay(10000);
+  intercom_data_t mqtt_data;
+  mqtt_data.cmd = MQTT_PUBLISH;
+  sprintf((char*)&mqtt_data.topic, "data_from_m7");
+  mqtt_data.data_length = 10;
+  uint32_t count = 0;
   while (1)
   {
     /* This is where the interrupt would be generated. */
-    while (HAL_HSEM_FastTake(HSEM_INTERCOM) != HAL_OK);
-    HAL_HSEM_Release(HSEM_INTERCOM, 0);
-    HAL_Delay(1000);
+
+    count++;
+    sprintf((char*)&mqtt_data.data, "%0*ld", 10, count);
+
+    mqtt_intercom__send(&mqtt_data);
+//    while (HAL_HSEM_FastTake(HSEM_INTERCOM) != HAL_OK);
+//    HAL_HSEM_Release(HSEM_INTERCOM, 0);
+    HAL_Delay(5000);
   }
 }
 
@@ -107,6 +118,7 @@ void setupExternalInterrupts(void)
 
 void HAL_HSEM_FreeCallback(uint32_t SemMask)
 {
+  printf("HSEM M7: FreeCallback!\n");
   if(SemMask & __HAL_HSEM_SEMID_TO_MASK(HSEM_INTERCOM))
   {
       mqtt_intercom__hsem_it();
@@ -115,5 +127,6 @@ void HAL_HSEM_FreeCallback(uint32_t SemMask)
 
 void mqtt_intercom__receive_cb(intercom_data_t * data)
 {
+  printf("Intercom M7: Receive callback");
   // Interpret command
 }

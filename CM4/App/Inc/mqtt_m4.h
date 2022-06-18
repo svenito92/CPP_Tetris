@@ -22,6 +22,8 @@ extern "C"
 #define MQTT_M4__QOS_MIN_ONCE 1
 #define MQTT_M4__QOS_EXACT_ONCE 2
 
+#define MQTT_M4__MAX_TOPIC_LENGTH 128
+
 
 void mqtt_m4__init(ip_addr_t host, uint16_t port, const char *client_id);
 void mqtt_m4__connect();
