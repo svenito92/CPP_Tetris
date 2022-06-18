@@ -25,7 +25,7 @@ extern "C"
 
 typedef enum
 {
-  MQTT_PUBLISH, MQTT_RECEIVE, MQTT_SUBSCRIBE
+  MQTT_PUBLISH, MQTT_RECEIVE, MQTT_SUBSCRIBE, M4_READY, M4_NOT_READY
 } intercom_cmd_t;
 
 typedef enum
@@ -35,8 +35,8 @@ typedef enum
 
 typedef struct
 {
-  uint8_t m4_ready;
   intercom_cmd_t cmd;
+  uint16_t data_length;
   char topic[INTERCOM_TOPIC_MAX_LENGTH];
   uint8_t data[INTERCOM_DATA_MAX_LENGTH];
 } intercom_data_t;
