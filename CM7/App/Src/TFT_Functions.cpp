@@ -89,21 +89,26 @@ uint8_t writeState(char *text, uint16_t color)
 		ST7735_DrawString_wS(0x0004, 0x0049, text, color, 2 );
 		return 0;
 	}
-
 }
 
 //
-uint8_t writeFourthLine(uint32_t moveDownCnt, uint16_t color){
+uint8_t writeFourthLine(uint32_t integer32, uint16_t color){
 	char levelTxt[5] = {0,0,0,0,0};
-	uint32_t tmpLevel = 100000 / moveDownCnt;
+	//uint32_t tmpLevel = 100000 / moveDownCnt;
 	//if(tmpLevel < 100){
 	//	ST7735_FillRectangle(0x0019, 0x0060, 0x0020, 0x0018, ST7735_BLACK);
 	//}
-	if(tmpLevel < 100){
-		sprintf(levelTxt, "0%d", tmpLevel);
+	if(integer32 < 10){
+		sprintf(levelTxt, "000%d", integer32);
+	}
+	else if(integer32 < 100){
+		sprintf(levelTxt, "00%d", integer32);
+	}
+	else if(integer32 < 1000){
+		sprintf(levelTxt, "0%d", integer32);
 	}
 	else{
-		sprintf(levelTxt, "%d", tmpLevel);
+		sprintf(levelTxt, "%d", integer32);
 	}
 	ST7735_DrawString_wS(0x0004, 0x0070 , levelTxt, color, 2);
 	return 0;
@@ -132,6 +137,66 @@ uint8_t writeScore(uint32_t score, uint16_t color)
 	ST7735_DrawString_wS(0x0056, 0x0058, title, color, 1 );
 	ST7735_DrawString_wS(0x0056, 0x0060, topLine, color, 1 );
 	ST7735_DrawString_wS(0x0056, 0x0068, botLine, color, 1 );
+}
+
+uint8_t writeRanking(uint16_t *score){
+	ST7735_FillScreen(ST7735_BLACK);
+	uint16_t tmpScore;
+	uint16_t col;
+	uint16_t yPixel = 4;
+	char scoreTxt[8] = {0,0,0,0,0,0,0,0};
+	for(uint8_t i = 0; i<10;i++){
+		switch (i) {
+			case 0:
+				col = ST7735_YELLOW;
+				break;
+			case 1:
+				col = ST7735_WHITE;
+				break;
+			case 2:
+				col = ST7735_ORANGE;
+				break;
+			default:
+				col = ST7735_BLUE;
+				break;
+		}
+
+		if(*score<10){
+			sprintf(scoreTxt, "%d. 000%d", i, *score);
+		}
+		else if(*score<100){
+			sprintf(scoreTxt, "%d. 00%d", i, *score);
+		}
+		else if(*score<1000){
+			sprintf(scoreTxt, "%d. 0%d", i, *score);
+		}
+		else{
+			sprintf(scoreTxt, "%d. %d", i, *score);
+		}
+
+		ST7735_DrawString_wS(0x0004, yPixel, scoreTxt, col, 1 );
+		score++;
+		yPixel+=8;
+	}
+}
+
+uint8_t writeLn(char *text, uint16_t color, uint8_t yPixel){
+	uint8_t NrOfChar=0;
+	while(*text)
+	{
+		NrOfChar++;
+		text++;
+	}
+	text = text-NrOfChar;
+	if(NrOfChar>10)
+	{
+		return 0x01;
+	}
+	else
+	{
+		ST7735_DrawString_wS(0x0004, yPixel, text, color, 2 );
+		return 0;
+	}
 }
 
 void setPreview(uint8_t block)

@@ -16,6 +16,7 @@
 #include "TFT_Functions.h"
 #include <iostream>
 #include "usart.h"
+#include "mqtt_intercom.h"
 
 #ifndef SRCCPP_LOOPER_H_
 #define SRCCPP_LOOPER_H_
@@ -26,6 +27,8 @@ public:
   Looper();
   virtual ~Looper();
   void run();
+  bool gameStartFlag = false;
+  bool interCoreComReady = false;
 
   // Enums
   enum ProcessState
@@ -37,6 +40,8 @@ public:
 	gameSettingsSPSetLevel = 25,
     gameSettingsMp = 30,
 	gameSettingsMpDrawScreen = 31,
+	waitOnStart =32,
+	initializeCom = 33,
     singlePlayer = 40,
     multiPlayer = 50,
     gameOver = 60,
@@ -108,18 +113,25 @@ private:
   uint32_t timer;		// when timer "overflows" move block
   uint32_t counter;		// counts how often the move timer overflowed
   uint32_t updateScreenCounter;
-  uint8_t buttonPressed;
+  uint32_t playerIdUpdate=0;
+  uint32_t gameOverUpdate=0;
+  uint16_t scoreRanking[10];
 
   // game control
   uint16_t score = 0;
   //uint8_t scoreMultiplier = 1;	//aka. Level use blockLevel cnt
-  uint8_t killedLines;
+  uint16_t killedLines;
+  uint16_t openKilledLines;
   uint16_t blocksInGame;
   uint16_t blocksPerTypeInGame[7];
   bool gameRunning;
   uint8_t role;
   bool roleMenu;
   uint8_t playerNr = 1;
+  uint8_t buttonPressed;
+  uint8_t activePlayers=0;
+  uint8_t gameMode=0; // 1 = Singelplayer, 2 = Multiplayer
+  bool gameWonFlag=false;
 
   // bool moveBlockOnBottom = true;
 
@@ -136,12 +148,14 @@ private:
   void generateBlocks();
   void btnReleased(uint32_t pressedButton);
   void accelerateGame();
+  void setNewScoreInRanking(uint16_t score);
 
   // action in states
   void stateSetGameMode();
   void stateSetLevelScreen();
   void stateSetLevelLevel();
   void stateDrawMpScreen();
+  void stateRanking();
   void stateSetMpSettings();
   void stateStartGame();
   void stateNewBlock();
@@ -152,6 +166,9 @@ private:
   void stateKillLine();
   void stateSpawnBlock();
   void stateUpdateScreen();
+  void stateWaitOnStart();
+  void stateInitializeCom();
+  void stateGameOver();
   // transition requirements from states
   void changeStateInBlockDown();
   void changeStateIdle();

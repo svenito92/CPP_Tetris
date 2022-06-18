@@ -13,6 +13,7 @@
 #include "usb_otg.h"
 #include "gpio.h"
 #include "mqtt_intercom.h"
+#include <string>
 
 // App Includes
 #include "Looper.h"
@@ -23,15 +24,16 @@
 
 void bootSystem(void);
 
+Looper looper = Looper();
+
 int main(void)
 {
   bootSystem();
 
-
   /* Initialize all peripherals */
   MX_GPIO_Init();
   MX_USART3_UART_Init();
-  printf("Hello from M7! (%s)\n",__TIME__);
+  printf("Hello from M7! (%s)\n", __TIME__);
 
   MX_USB_OTG_FS_PCD_Init();
   MX_I2C1_Init();
@@ -44,10 +46,9 @@ int main(void)
   mqtt_intercom__init();
 
 #ifndef DEBUG_M4_ONLY // Used to exclude M7 from running game to help debug M4 Core
-  Looper looper = Looper();
+ // Looper looper = Looper();
   looper.run();
 #endif
-
 
   intercom_data_t mqtt_data;
   mqtt_data.cmd = MQTT_SUBSCRIBE;
@@ -115,7 +116,35 @@ void HAL_HSEM_FreeCallback(uint32_t SemMask)
 
 void mqtt_intercom__receive_cb(intercom_data_t *data)
 {
-  printf("Intercom M7: Receive intercom command '%d'",data->cmd);
+  printf("Intercom M7: Receive intercom command '%d'", data->cmd);
   // Interpret command
   HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
+#ifndef DEBUG_M4_ONLY // Used to exclude M7 from running game to help debug M4 Core
+  std::string topic = "test";
+
+  switch (data->cmd)
+  {
+
+  case M4_READY:
+    looper.interCoreComReady = true;
+    break;
+  case M4_NOT_READY:
+    looper.interCoreComReady = false;
+    break;
+
+  case MQTT_RECEIVE:
+    if (topic.compare("test") == 0)
+    {
+      looper.gameStartFlag = true;
+    }
+    else
+    {
+      looper.gameStartFlag = false;
+    }
+    break;
+  default:
+    break;
+
+  }
+#endif
 }
