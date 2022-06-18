@@ -46,7 +46,8 @@ int main(void)
   while (1)
   {
     /* This is where the interrupt would be generated. */
-    HAL_EXTI_GenerateSWInterrupt(EXTI_LINE1);
+    while (HAL_HSEM_FastTake(HSEM_INTERCOM) != HAL_OK);
+    HAL_HSEM_Release(HSEM_INTERCOM, 0);
     HAL_Delay(1000);
   }
 }
