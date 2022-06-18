@@ -54,7 +54,7 @@ void mqtt_m4__connect()
   err = mqtt_client_connect(_client, &_host, _port, mqtt_m4__connection_cb, (void*) &topic, &client_info);
   if (err != ERR_OK)
   {
-    printf("MQTT M4: mqtt_connect return %d\n", err);
+    printf("MQTT M4: mqtt_connect error: %d\n", err);
   }
 }
 
@@ -66,7 +66,7 @@ void mqtt_m4__subscribe(const char *topic, uint8_t qos)
   err = mqtt_subscribe(_client, topic, qos, mqtt_m4__sub_request_cb, 0);
   if (err == ERR_OK)
   {
-    printf("MQTT M4: Successfully connected to '%s'\n", topic);
+    printf("MQTT M4: Successfully subscribed to '%s'\n", topic);
   }
   else
   {
@@ -124,7 +124,7 @@ static void mqtt_m4__connection_cb(mqtt_client_t *client, void *arg, mqtt_connec
 
 static void mqtt_m4__incoming_publish_cb(void *arg, const char *topic, u32_t tot_len)
 {
-  printf("MQTT M4: Incoming public callback!\n");
+  printf("MQTT M4: Incoming publish callback from topic '%s'\n", topic);
   char *topic_buf = (char*) arg;
   strcpy(topic_buf, topic);
 
@@ -139,7 +139,7 @@ static void mqtt_m4__incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8
   char *topic_buf = (char*) arg;
   intercom_data_t mqtt_data;
 
-  printf("MQTT M4: Incoming data callback!\n");
+  printf("MQTT M4: Incoming data callback! Length: %d\n", len);
 
   if (flags == MQTT_DATA_FLAG_LAST)
   {
@@ -156,7 +156,9 @@ static void mqtt_m4__incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8
     {
       memcpy(&mqtt_data.data, data, len);
     }
+    printf("MQTT M4: Intercom send...");
     mqtt_intercom__send(&mqtt_data);
+    printf("Done\n");
   }
   else
   {

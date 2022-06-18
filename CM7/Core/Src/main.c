@@ -133,6 +133,26 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+int _write(int file, char *ptr, int len)
+{
+  char ts[13];
+
+  //Transmit timestamp
+  sprintf(ts, "% *ld: ", 10, HAL_GetTick());
+  HAL_UART_Transmit(&huart3, ts, 12, 500);
+
+  if (ptr[len - 1] == '\n' && ptr[len - 2] != '\r') // Check if line ends only with \n. If so, send \r\n
+  {
+    HAL_UART_Transmit(&huart3, (uint8_t*) ptr, len - 1, 500);
+    HAL_UART_Transmit(&huart3, "\r\n", 2, 500);
+  }
+  else
+  {
+    HAL_UART_Transmit(&huart3, (uint8_t*) ptr, len, 1000);
+  }
+  return len;
+}
+
 void MPU_Config_ext(void)
 {
   MPU_Config();

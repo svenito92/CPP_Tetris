@@ -23,6 +23,7 @@ void mqtt_intercom__init(void)
   mqtt_intercom__release_hsem();
 }
 
+// Flag for M7 to show that M4 Core is ready for communication
 void mqtt_intercom__set_m4_ready(void)
 {
   while (HAL_HSEM_FastTake(HSEM_INTERCOM) != HAL_OK);
@@ -58,6 +59,7 @@ void mqtt_intercom__hsem_it(void)
   else
   {
     // Acknowledge of successful send
+    mqtt_intercom__state = INTERCOM_IDLE;
   }
 }
 
