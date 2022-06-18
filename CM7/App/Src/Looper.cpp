@@ -99,6 +99,13 @@ void Looper::run() {
 		 case gameWon:
 			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Game Won\n", 9, 0xFFFF);
 			 writeState("YOU WON", ST7735_BLUE); // show screen
+			if(gameMode == 2){
+				data->cmd = MQTT_PUBLISH;
+				sprintf((char*)&data->topic,"GameWon");
+				data->data_length = 1;
+				data->data[0] = playerNr;
+				mqtt_intercom__send(data);
+			}
 			 processState = ranking;
 			 break;
 		 case ranking:
@@ -168,7 +175,7 @@ void Looper::runGame() {
 			HAL_UART_Transmit(&huart3,(const uint8_t*)"fix block\n", 11, 0xFFFF);
 			stateFixBlock();
 			// CHECK IN MULTIPLAYER MODE HOW MANY PLAYERS REMAIN
-			if (false) {  // check in MP mode
+			if (activePlayers==0) {  // check in MP mode
 				processState = gameWon;
 				finalizeGame();
 			}
