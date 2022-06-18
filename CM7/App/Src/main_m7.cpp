@@ -13,7 +13,7 @@
 #include "usb_otg.h"
 #include "gpio.h"
 #include "mqtt_intercom.h"
-#include <bits/stdc++.h>
+#include <string>
 
 // App Includes
 #include "Looper.h"
@@ -24,6 +24,8 @@
 
 void bootSystem(void);
 void setupExternalInterrupts(void);
+
+Looper looper  = Looper();
 
 int main(void)
 {
@@ -41,7 +43,7 @@ int main(void)
   printf("Hello from M7!\n");
 
 #ifndef DEBUG_M4_ONLY // Used to exclude M7 from running game to help debug M4 Core
-  Looper looper = Looper();
+ // Looper looper = Looper();
   looper.run();
 #endif
   HAL_Delay(10000);
@@ -129,21 +131,23 @@ void mqtt_intercom__receive_cb(intercom_data_t * data)
 {
   printf("Intercom M7: Receive callback");
   // Interpret command
-uint8_t i=0;	// i=2 da 0. byte M4 ready und 1. byte CMD ist
-char charTopic[20] = {0};
-std::string topic;
+std::string topic = "test";
 
 	switch(data->cmd){
 
-	M4_READY:		InterCoreComReady = true;
+	case M4_READY:		looper.interCoreComReady = true;
+					break;
+	case M4_NOT_READY:	looper.interCoreComReady = false;
 					break;
 
-	MQTT_RECEIVE:	while(data->data[i]!=0){			  // Interpret command
-		  	  	  	  charTopic[i]= (char)data->data[i];
+	case MQTT_RECEIVE:	if(topic.compare("test")==0){
+						looper.gameStartFlag=true;
 					}
-
+					else{
+						looper.gameStartFlag=false;
+					}
 					break;
-
+	default	:		break;
 
   }
 }

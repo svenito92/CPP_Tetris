@@ -22,6 +22,7 @@ void Looper::run() {
 
 	// init system, ethernet, screen, buttons
 	initScreen();
+//	intercom_data_t *test;
 	// main loop here
 	processState = init;
 	while (true) {
@@ -33,6 +34,9 @@ void Looper::run() {
 			 HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 			 HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
 			 processState = selectGameModeSetScreen;
+			// test->cmd = MQTT_RECEIVE;
+			// sprintf((char*)&test->topic,"test");
+			// mqtt_intercom__receive_cb(test);
 			 break;
 		 case selectGameModeSetScreen:
 			 stateSetGameMode();
@@ -68,24 +72,31 @@ void Looper::run() {
 			 //implement see single player and add mp parameters
 			 break;
 		 case singlePlayer:
+			 gameMode=1;
 			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"SP game\n", 8, 0xFFFF);
 			 runGame(); // singlePlayer as parameter
+			 break;
+		 case initializeCom:
+			 stateInitializeCom();
+			 processState = waitOnStart;
 			 break;
 		 case waitOnStart:
 			 stateWaitOnStart();
 
 			 break;
 		 case multiPlayer:
+			 gameMode = 2;
 			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"MP game\n", 12, 0xFFFF);
 			 // implement
 			 runGame();
 			 break;
 		 case gameOver:
+			 stateGameOver();
 			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Game Over\n", 10, 0xFFFF);
 			 // show screen and wait a moment
-			 writeState("GAME OVER", ST7735_BLUE);
+			 /*writeState("GAME OVER", ST7735_BLUE);
 			 HAL_Delay(3000);
-			 processState = ranking;
+			 processState = ranking;*/
 			 break;
 		 case gameWon:
 			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Game Won\n", 9, 0xFFFF);
@@ -175,10 +186,11 @@ void Looper::runGame() {
 			// check all lines & kill line and move Lines above
 			stateKillLine();
 			// change state
-			if (playground.isOverflow()) {
+			/*if (playground.isOverflow()) {
 				finalizeGame();
 				processState = gameOver;
-			} else if(false){	// MULTI PLAYER INSERT NEW LINE
+			} else */
+			if(gameMode == 2 ){	// MULTI PLAYER INSERT NEW LINE
 				gameState = insertLine;
 			} else{
 				gameState = generateNewBlock;
@@ -372,7 +384,7 @@ void Looper::stateSetMpSettings(){
 			HAL_Delay(200);
 		 }
 		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_1)){
-			 processState = waitOnStart;
+			 processState = initializeCom;
 			HAL_Delay(200);
 		 }
 	 }
@@ -472,6 +484,9 @@ void Looper::stateFixBlock() {
 
 // state killLine
 void Looper::stateKillLine() {
+	uint16_t oldKilledLines = killedLines;
+	uint8_t linesSend=0;
+
 	for (uint8_t line = 0; line < 21; line++) {
 		if (playground.isLineFull(line)) {
 			playground.killLine(line);
@@ -481,6 +496,24 @@ void Looper::stateKillLine() {
 			writeScore(score, ST7735_BLUE);
 		}
 	}
+	oldKilledLines= killedLines-oldKilledLines+openKilledLines;
+	while(oldKilledLines!= 0){
+		if(oldKilledLines > activePlayers){
+			linesSend++;
+			oldKilledLines - activePlayers;
+		}
+		else{
+			openKilledLines = oldKilledLines;
+			oldKilledLines=0;
+		}
+	}
+
+	data->cmd = MQTT_PUBLISH;
+	sprintf((char*)&data->topic,"KillLine");
+	data->data_length = 2;
+	data->data[0] = playerNr;
+	data->data[1] = linesSend;
+	mqtt_intercom__send(data);
 	HAL_UART_Transmit(&huart3,(const uint8_t*)score +'0', 10, 0xFFFF);
 }
 
@@ -588,6 +621,7 @@ void Looper::stateUpdateScreen() {
 }
 
 void Looper::stateWaitOnStart(){
+	intercom_data_t *data
 	if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_3)){
 		processState = 	gameSettingsMpDrawScreen;
 
@@ -596,9 +630,47 @@ void Looper::stateWaitOnStart(){
 		processState = multiPlayer;
 
 	}
-
+	else{
+		processState = 	waitOnStart;
+		if(HAL_GetTick()-playerIdUpdate >= 500) {
+			playerIdUpdate = HAL_GetTick();
+			data->cmd = MQTT_PUBLISH;
+			sprintf((char*)&data->topic,"Players");
+			data->data_length = 1;
+			data->data = playerNr;
+			mqtt_intercom__send(data);
+		}
+	}
 }
 
+void Looper::stateInitializeCom(){
+intercom_data_t *data;
+
+	if(interCoreComReady = true){
+		data->cmd = MQTT_SUBSCRIBE;
+		sprintf(data->topic,"StartGame");
+		mqtt_intercom__send(data);
+		data->cmd = MQTT_SUBSCRIBE;
+		sprintf(data->topic,"Players");
+		mqtt_intercom__send(data);
+		data->cmd = MQTT_SUBSCRIBE;
+		sprintf(data->topic,"KillLine");
+		mqtt_intercom__send(data);
+		data->cmd = MQTT_SUBSCRIBE;
+		sprintf(data->topic,"GameOver");
+		mqtt_intercom__send(data);
+		data->cmd = MQTT_SUBSCRIBE;
+		sprintf(data->topic,"GameWon");
+		mqtt_intercom__send(data);
+	}
+}
+
+void stateGameOver(){
+
+	 processState = ranking;
+
+
+}
 // Finalize game, change states and stop loop
 void Looper::finalizeGame() {
 	gameState = startGame;

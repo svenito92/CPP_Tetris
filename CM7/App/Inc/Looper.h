@@ -16,6 +16,7 @@
 #include "TFT_Functions.h"
 #include <iostream>
 #include "usart.h"
+#include "mqtt_intercom.h"
 
 #ifndef SRCCPP_LOOPER_H_
 #define SRCCPP_LOOPER_H_
@@ -26,6 +27,8 @@ public:
   Looper();
   virtual ~Looper();
   void run();
+  bool gameStartFlag = false;
+  bool interCoreComReady = false;
 
   // Enums
   enum ProcessState
@@ -38,6 +41,7 @@ public:
     gameSettingsMp = 30,
 	gameSettingsMpDrawScreen = 31,
 	waitOnStart =32,
+	initializeCom = 33,
     singlePlayer = 40,
     multiPlayer = 50,
     gameOver = 60,
@@ -109,20 +113,24 @@ private:
   uint32_t timer;		// when timer "overflows" move block
   uint32_t counter;		// counts how often the move timer overflowed
   uint32_t updateScreenCounter;
-  uint8_t buttonPressed;
+  uint32_t playerIdUpdate=0;
+
 
   // game control
   uint16_t score = 0;
   //uint8_t scoreMultiplier = 1;	//aka. Level use blockLevel cnt
-  uint8_t killedLines;
+  uint16_t killedLines;
+  uint16_t openKilledLines;
   uint16_t blocksInGame;
   uint16_t blocksPerTypeInGame[7];
   bool gameRunning;
   uint8_t role;
   bool roleMenu;
   uint8_t playerNr = 1;
-  bool gameStartFlag = false;
-  bool InterCoreComReady = false;
+  uint8_t buttonPressed;
+  uint8_t activePlayers=0;
+  uint8_t gameMode=0; // 1 = Singelplayer, 2 = Multiplayer
+
 
   // bool moveBlockOnBottom = true;
 
@@ -156,6 +164,7 @@ private:
   void stateSpawnBlock();
   void stateUpdateScreen();
   void stateWaitOnStart();
+  void stateInitializeCom();
   // transition requirements from states
   void changeStateInBlockDown();
   void changeStateIdle();
