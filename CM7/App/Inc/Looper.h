@@ -115,7 +115,7 @@ private:
   uint32_t updateScreenCounter;
   uint32_t playerIdUpdate=0;
   uint32_t gameOverUpdate=0;
-
+  uint16_t scoreRanking[10];
 
   // game control
   uint16_t score = 0;
@@ -131,7 +131,7 @@ private:
   uint8_t buttonPressed;
   uint8_t activePlayers=0;
   uint8_t gameMode=0; // 1 = Singelplayer, 2 = Multiplayer
-  bool gameWon=0;
+  bool gameWonFlag=false;
 
   // bool moveBlockOnBottom = true;
 
@@ -148,12 +148,14 @@ private:
   void generateBlocks();
   void btnReleased(uint32_t pressedButton);
   void accelerateGame();
+  void setNewScoreInRanking(uint16_t score);
 
   // action in states
   void stateSetGameMode();
   void stateSetLevelScreen();
   void stateSetLevelLevel();
   void stateDrawMpScreen();
+  void stateRanking();
   void stateSetMpSettings();
   void stateStartGame();
   void stateNewBlock();

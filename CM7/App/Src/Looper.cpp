@@ -528,6 +528,7 @@ void Looper::stateFixBlock() {
 void Looper::stateKillLine() {
 	uint16_t oldKilledLines = killedLines;
 	uint8_t linesSend=0;
+	intercom_data_t *data;
 
 	for (uint8_t line = 0; line < 21; line++) {
 		if (playground.isLineFull(line)) {
@@ -663,7 +664,7 @@ void Looper::stateUpdateScreen() {
 }
 
 void Looper::stateWaitOnStart(){
-	intercom_data_t *data
+	intercom_data_t *data;
 	if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_3)){
 		processState = 	gameSettingsMpDrawScreen;
 
@@ -679,7 +680,7 @@ void Looper::stateWaitOnStart(){
 			data->cmd = MQTT_PUBLISH;
 			sprintf((char*)&data->topic,"Players");
 			data->data_length = 1;
-			data->data = playerNr;
+			data->data[0] = playerNr;
 			mqtt_intercom__send(data);
 		}
 	}
@@ -707,17 +708,18 @@ intercom_data_t *data;
 	}
 }
 
-void stateGameOver(){
+void Looper::stateGameOver(){
+	intercom_data_t *data;
 	if(gameMode = 2){	// Multiplayer
 		if(HAL_GetTick()-gameOverUpdate >= 500) {
 			gameOverUpdate = HAL_GetTick();
 			data->cmd = MQTT_PUBLISH;
 			sprintf((char*)&data->topic,"GameOver");
 			data->data_length = 1;
-			data->data = playerNr;
+			data->data[0] = playerNr;
 			mqtt_intercom__send(data);
 		}
-		if(gameWon==1){
+		if(gameWonFlag==1){
 			processState = ranking;
 		}
 	}
