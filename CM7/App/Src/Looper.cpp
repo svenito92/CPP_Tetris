@@ -91,12 +91,10 @@ void Looper::run() {
 			 runGame();
 			 break;
 		 case gameOver:
+			 writeState("GAME OVER", ST7735_BLUE);
 			 stateGameOver();
 			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Game Over\n", 10, 0xFFFF);
 			 // show screen and wait a moment
-			 /*writeState("GAME OVER", ST7735_BLUE);
-			 HAL_Delay(3000);
-			 processState = ranking;*/
 			 break;
 		 case gameWon:
 			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Game Won\n", 9, 0xFFFF);
@@ -104,6 +102,11 @@ void Looper::run() {
 			 processState = ranking;
 			 break;
 		 case ranking:
+			 setNewScoreInRanking(score);
+			 writeFourthLine(score, ST7735_YELLOW);
+			 HAL_Delay(2000);
+			 writeRanking(&scoreRanking[0]);
+			 HAL_Delay(10000);
 			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Ranking\n", 8, 0xFFFF);
 			 // show screen and wait a moment
 			 processState = init;
@@ -260,6 +263,36 @@ void Looper::btnReleased(uint32_t pressedButton) {
 	HAL_UART_Transmit(&huart3,(const uint8_t*)"Btn released\n", 13, 0xFFFF);
 }
 
+// set a new score in ranking
+void Looper::setNewScoreInRanking(uint16_t setScore){
+	bool scoreWritten = false;
+
+
+	if(setScore > scoreRanking[9]){
+		scoreRanking[9] = setScore;
+	}
+	for(int8_t i = 8; i>=0;i--){
+		if(setScore > scoreRanking[i]){
+			scoreRanking[i+1] = scoreRanking[i];
+			HAL_UART_Transmit(&huart3, (const uint8_t*) "Score >\n", 8, 0xFFFF);
+			if(i==0){
+				scoreRanking[0] = setScore;
+				// show highscore
+				writeLn("HIGHSCORE", ST7735_YELLOW, 128);
+			}
+		}
+		else if(setScore <= scoreRanking[i] && !scoreWritten){
+			scoreRanking[i+1] = setScore;
+			scoreWritten = true;
+			HAL_UART_Transmit(&huart3, (const uint8_t*) "Score <\n", 8, 0xFFFF);
+		}
+		else{
+			// do nothing
+		}
+	}
+	HAL_UART_Transmit(&huart3, (const uint8_t*) "Write score end\n", 16, 0xFFFF);
+}
+
 /*
  * Action in states
  */
@@ -274,6 +307,7 @@ void Looper::stateSetGameMode(){
 
 //
 void Looper::stateSetLevelScreen(){
+	blockDownCnt = INIT_BLOCK_DOWN_CNT;
 	HAL_UART_Transmit(&huart3, (const uint8_t*) "Set level SP\n", 13, 0xFFFF);
 	ST7735_FillScreen(ST7735_BLACK);
 	writeTopLine("Start", ST7735_CYAN);
@@ -286,7 +320,7 @@ void Looper::stateSetLevelScreen(){
 //
 void Looper::stateSetLevelLevel(){
 	//HAL_UART_Transmit(&huart3, (const uint8_t*) "Set level SP2\n", 14, 0xFFFF);
-	writeFourthLine(blockDownCnt, ST7735_BLUE);
+	writeFourthLine(10000/blockDownCnt, ST7735_BLUE);
 	//HAL_Delay(500);
 
 	if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_1)){
@@ -392,7 +426,7 @@ void Looper::stateSetMpSettings(){
 
 // TO DO, SET LEVEL, MULTIPLAYER
 void Looper::stateStartGame() {
-	blockDownCnt = INIT_BLOCK_DOWN_CNT;
+	//blockDownCnt = INIT_BLOCK_DOWN_CNT;
 	score = 0;
 	killedLines = 0;
 	blocksInGame = 0;
@@ -666,10 +700,23 @@ intercom_data_t *data;
 }
 
 void stateGameOver(){
-
-	 processState = ranking;
-
-
+	if(gameMode = 2){	// Multiplayer
+		if(HAL_GetTick()-gameOverUpdate >= 500) {
+			gameOverUpdate = HAL_GetTick();
+			data->cmd = MQTT_PUBLISH;
+			sprintf((char*)&data->topic,"GameOver");
+			data->data_length = 1;
+			data->data = playerNr;
+			mqtt_intercom__send(data);
+		}
+		if(gameWon==1){
+			processState = ranking;
+		}
+	}
+	else{
+		 HAL_Delay(3000);
+		 processState = ranking;
+	}
 }
 // Finalize game, change states and stop loop
 void Looper::finalizeGame() {

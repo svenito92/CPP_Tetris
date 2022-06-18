@@ -114,7 +114,19 @@ void HAL_HSEM_FreeCallback(uint32_t SemMask)
 
 void mqtt_intercom__receive_cb(intercom_data_t * data)
 {
-  printf("Intercom M4: Receive callback");
+  switch(data->cmd)
+  {
+  case MQTT_PUBLISH:
+    mqtt_m4__publish(data->topic, data->data, data->data_length, MQTT_M4__QOS_MIN_ONCE, MQTT_M4__NO_RETAIN);
+    break;
+  case MQTT_SUBSCRIBE:
+    mqtt_m4__subscribe(data->topic, 1);
+    break;
+  default:
+    printf("Intercom M4: unknown command!\n");
+    break;
+  }
+  printf("Intercom M4: Receive callback\n");
   // Interpret command
 }
 

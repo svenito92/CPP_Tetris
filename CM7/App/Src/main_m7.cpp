@@ -48,6 +48,7 @@ int main(void)
 #endif
   HAL_Delay(10000);
   intercom_data_t mqtt_data;
+  mqtt_data.cmd = MQTT_PUBLISH;
   sprintf((char*)&mqtt_data.topic, "data_from_m7");
   mqtt_data.data_length = 10;
   uint32_t count = 0;

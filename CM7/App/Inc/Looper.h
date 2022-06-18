@@ -114,6 +114,7 @@ private:
   uint32_t counter;		// counts how often the move timer overflowed
   uint32_t updateScreenCounter;
   uint32_t playerIdUpdate=0;
+  uint32_t gameOverUpdate=0;
 
 
   // game control
@@ -165,6 +166,7 @@ private:
   void stateUpdateScreen();
   void stateWaitOnStart();
   void stateInitializeCom();
+  void stateGameOver();
   // transition requirements from states
   void changeStateInBlockDown();
   void changeStateIdle();

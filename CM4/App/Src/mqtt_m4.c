@@ -9,12 +9,14 @@
 
 #include "stdio.h"
 #include "string.h"
+#include "mqtt_intercom.h"
 
 // Private variables declaration
 static mqtt_client_t *_client;
 static ip_addr_t _host;
 static uint16_t _port;
 static const char *_client_id;
+static char topic[MQTT_M4__MAX_TOPIC_LENGTH];
 
 // Private function declaration
 static void mqtt_m4__connection_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status);
@@ -49,7 +51,7 @@ void mqtt_m4__connect()
   memset(&client_info, 0, sizeof(client_info));
   client_info.client_id = _client_id;
 
-  err = mqtt_client_connect(_client, &_host, _port, mqtt_m4__connection_cb, 0, &client_info);
+  err = mqtt_client_connect(_client, &_host, _port, mqtt_m4__connection_cb, (void*) &topic, &client_info);
   if (err != ERR_OK)
   {
     printf("MQTT M4: mqtt_connect return %d\n", err);
@@ -123,11 +125,44 @@ static void mqtt_m4__connection_cb(mqtt_client_t *client, void *arg, mqtt_connec
 static void mqtt_m4__incoming_publish_cb(void *arg, const char *topic, u32_t tot_len)
 {
   printf("MQTT M4: Incoming public callback!\n");
+  char *topic_buf = (char*) arg;
+  strcpy(topic_buf, topic);
+
+  if (tot_len == 0)
+  {
+    mqtt_m4__incoming_data_cb(arg, 0, 0, MQTT_DATA_FLAG_LAST);
+  }
 }
 
 static void mqtt_m4__incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t flags)
 {
+  char *topic_buf = (char*) arg;
+  intercom_data_t mqtt_data;
+
   printf("MQTT M4: Incoming data callback!\n");
+
+  if (flags == MQTT_DATA_FLAG_LAST)
+  {
+    if (len > INTERCOM_DATA_MAX_LENGTH)
+    {
+      len = INTERCOM_DATA_MAX_LENGTH;
+      printf("MQTT M4: Too large publish data (overhead is truncated)!\n");
+    }
+
+    mqtt_data.cmd = MQTT_RECEIVE;
+    mqtt_data.data_length = len;
+    strcpy((char*) &mqtt_data.data, topic_buf);
+    if (len > 0)
+    {
+      memcpy(&mqtt_data.data, data, len);
+    }
+    mqtt_intercom__send(&mqtt_data);
+  }
+  else
+  {
+    printf("MQTT M4: Too large publish data!\n");
+  }
+
 }
 
 static void mqtt_m4__sub_request_cb(void *arg, err_t result)
