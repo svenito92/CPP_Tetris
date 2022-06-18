@@ -71,6 +71,10 @@ void Looper::run() {
 			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"SP game\n", 8, 0xFFFF);
 			 runGame(); // singlePlayer as parameter
 			 break;
+		 case waitOnStart:
+			 stateWaitOnStart();
+
+			 break;
 		 case multiPlayer:
 			 //HAL_UART_Transmit(&huart3,(const uint8_t*)"MP game\n", 12, 0xFFFF);
 			 // implement
@@ -368,7 +372,7 @@ void Looper::stateSetMpSettings(){
 			HAL_Delay(200);
 		 }
 		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_1)){
-			 processState = multiPlayer;
+			 processState = waitOnStart;
 			HAL_Delay(200);
 		 }
 	 }
@@ -581,6 +585,18 @@ void Looper::stateUpdateScreen() {
 	drawField(unitedFieldData);
 	setPreview(playBlocks[nextBlockNo].getBlockType());
 	gameState = idle;
+}
+
+void Looper::stateWaitOnStart(){
+	if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_3)){
+		processState = 	gameSettingsMpDrawScreen;
+
+	}
+	else if(gameStartFlag != 0){
+		processState = multiPlayer;
+
+	}
+
 }
 
 // Finalize game, change states and stop loop

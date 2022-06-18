@@ -37,6 +37,7 @@ public:
 	gameSettingsSPSetLevel = 25,
     gameSettingsMp = 30,
 	gameSettingsMpDrawScreen = 31,
+	waitOnStart =32,
     singlePlayer = 40,
     multiPlayer = 50,
     gameOver = 60,
@@ -120,6 +121,8 @@ private:
   uint8_t role;
   bool roleMenu;
   uint8_t playerNr = 1;
+  bool gameStartFlag = false;
+  bool InterCoreComReady = false;
 
   // bool moveBlockOnBottom = true;
 
@@ -152,6 +155,7 @@ private:
   void stateKillLine();
   void stateSpawnBlock();
   void stateUpdateScreen();
+  void stateWaitOnStart();
   // transition requirements from states
   void changeStateInBlockDown();
   void changeStateIdle();

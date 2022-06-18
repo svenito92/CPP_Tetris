@@ -27,6 +27,7 @@ void mqtt_intercom__init(void)
   HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(HSEM_INTERCOM));
 }
 
+// Flag for M7 to show that M4 Core is ready for communication
 void mqtt_intercom__set_m4_ready(void)
 {
   while (HAL_HSEM_FastTake(HSEM_INTERCOM) != HAL_OK);

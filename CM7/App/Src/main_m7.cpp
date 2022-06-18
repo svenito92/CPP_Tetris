@@ -13,6 +13,7 @@
 #include "usb_otg.h"
 #include "gpio.h"
 #include "mqtt_intercom.h"
+#include <bits/stdc++.h>
 
 // App Includes
 #include "Looper.h"
@@ -115,5 +116,21 @@ void HAL_HSEM_FreeCallback(uint32_t SemMask)
 
 void mqtt_intercom__receive_cb(intercom_data_t * data)
 {
-  // Interpret command
+uint8_t i=0;	// i=2 da 0. byte M4 ready und 1. byte CMD ist
+char charTopic[20] = {0};
+std::string topic;
+
+	switch(data->cmd){
+
+	M4_READY:		InterCoreComReady = true;
+					break;
+
+	MQTT_RECEIVE:	while(data->data[i]!=0){			  // Interpret command
+		  	  	  	  charTopic[i]= (char)data->data[i];
+					}
+
+					break;
+
+
+  }
 }
