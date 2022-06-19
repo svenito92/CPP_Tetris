@@ -64,8 +64,8 @@ void Looper::run() {
 			 stateSetLevelLevel();
 			 break;
 		 case gameSettingsMpDrawScreen:
-		 			 stateDrawMpScreen();
-		 			 processState = gameSettingsMp;
+		 	stateDrawMpScreen();
+		 	processState = gameSettingsMp;
 		 	break;
 		 case gameSettingsMp:
 			 stateSetMpSettings();
@@ -312,8 +312,8 @@ void Looper::stateSetLevelScreen(){
 	HAL_UART_Transmit(&huart3, (const uint8_t*) "Set level SP\r\n", 13, 0xFFFF);
 	ST7735_FillScreen(ST7735_BLACK);
 	writeTopLine("Start", ST7735_CYAN);
-	writeBtnMiddleLine("Level +", ST7735_RED);
-	writeState("Level -", ST7735_GREEN);
+	writeBtnMiddleLine("- Level +", ST7735_RED);
+	//writeState("Level -", ST7735_GREEN);
 	writeFourthLine(blockDownCnt, ST7735_BLUE);
 
 }
@@ -328,7 +328,11 @@ void Looper::stateSetLevelLevel(){
 		processState = singlePlayer;
 		btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
 	}
-	else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_2)){
+	else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_3)){
+		processState = selectGameModeSetScreen;
+		btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
+	}
+	else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_DOWN)){ //!(buttons & (uint32_t) TFTSHIELD_BUTTON_DOWN)
 		if(blockDownCnt > 200){
 			blockDownCnt -= 50;
 			btnReleased((uint32_t)TFTSHIELD_BUTTON_2);
@@ -337,7 +341,7 @@ void Looper::stateSetLevelLevel(){
 
 		}
 	}
-	else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_3)){
+	else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_UP)){ //!(buttons & (uint32_t) TFTSHIELD_BUTTON_UP)
 		if(blockDownCnt < 3000){
 			blockDownCnt += 50;
 			btnReleased((uint32_t) TFTSHIELD_BUTTON_3);
