@@ -25,6 +25,7 @@ static void setupExternalInterrupts(void);
 int main(void)
 {
   ip_addr_t host;
+  uint16_t port;
 
   bootSystem();
 
@@ -36,8 +37,10 @@ int main(void)
 
 #ifdef LOCAL_CONNECTION
   IP4_ADDR(&host, 10, 20, 30, 1);
+  port = 1883;
 #else
   IP4_ADDR(&host, 144, 2, 69, 24);
+  port = 54321;
 #endif
 
   MX_LWIP_Init();
@@ -54,7 +57,7 @@ int main(void)
 
   MX_LWIP_Process();
 
-  mqtt_m4__init(host, 1883, "tetris_test");
+  mqtt_m4__init(host, port, "tetris_test");
   MX_LWIP_Process();
 
   mqtt_m4__connect();
