@@ -58,62 +58,62 @@ void mqtt_intercom__handle(void)
     timestamp = HAL_GetTick();
     printf("IC State: %s\n", states[mqtt_intercom__state]);
 #endif
-    switch (mqtt_intercom__state)
+  switch (mqtt_intercom__state)
+  {
+  case INTERCOM_M4_READY:
+    if (hsem_obtained() == TRUE)
     {
-    case INTERCOM_M4_READY:
-      if (hsem_obtained() == TRUE)
-      {
-        printf("IC: M4 rdy\n");
-        intercom_data.cmd = M4_READY;
-        hsem_release();
-        mqtt_intercom__state = INTERCOM_ACK_WAIT;
-      }
-      break;
-    case INTERCOM_SEND:
-      if (hsem_obtained() == TRUE)
-      {
-        printf("IC: send\n");
-        memcpy(&intercom_data, &temp_data, sizeof(intercom_data_t));
-        hsem_release();
-        mqtt_intercom__state = INTERCOM_ACK_WAIT;
-      }
-      break;
-    case INTERCOM_RECEIVE:
-      if (hsem_obtained() == TRUE)
-      {
-        printf("IC: receive\n");
-        mqtt_intercom__receive_cb(&intercom_data);
-        hsem_release();
-        mqtt_intercom__state = INTERCOM_IDLE;
-      }
-      break;
-    case INTERCOM_IDLE:
-      if (send_pending == TRUE)
-      {
-        mqtt_intercom__state = INTERCOM_SEND;
-        send_pending = FALSE;
-      }
-      if (m4_ready_pending == TRUE)
-      {
-        mqtt_intercom__state = INTERCOM_M4_READY;
-        m4_ready_pending = FALSE;
-      }
-      if (receive_pending == TRUE)
-      {
-        mqtt_intercom__state = INTERCOM_RECEIVE;
-        receive_pending = FALSE;
-      }
-      break;
-    case INTERCOM_ACK_WAIT:
-      if(ack_pending == TRUE)
-      {
-        mqtt_intercom__state = INTERCOM_IDLE;
-        ack_pending = FALSE;
-      }
-      break;
-    default:
-      break;
+      printf("IC: M4 rdy\n");
+      intercom_data.cmd = M4_READY;
+      hsem_release();
+      mqtt_intercom__state = INTERCOM_ACK_WAIT;
     }
+    break;
+  case INTERCOM_SEND:
+    if (hsem_obtained() == TRUE)
+    {
+      printf("IC: send\n");
+      memcpy(&intercom_data, &temp_data, sizeof(intercom_data_t));
+      hsem_release();
+      mqtt_intercom__state = INTERCOM_ACK_WAIT;
+    }
+    break;
+  case INTERCOM_RECEIVE:
+    if (hsem_obtained() == TRUE)
+    {
+      printf("IC: receive\n");
+      mqtt_intercom__receive_cb(&intercom_data);
+      hsem_release();
+      mqtt_intercom__state = INTERCOM_IDLE;
+    }
+    break;
+  case INTERCOM_IDLE:
+    if (send_pending == TRUE)
+    {
+      mqtt_intercom__state = INTERCOM_SEND;
+      send_pending = FALSE;
+    }
+    if (m4_ready_pending == TRUE)
+    {
+      mqtt_intercom__state = INTERCOM_M4_READY;
+      m4_ready_pending = FALSE;
+    }
+    if (receive_pending == TRUE)
+    {
+      mqtt_intercom__state = INTERCOM_RECEIVE;
+      receive_pending = FALSE;
+    }
+    break;
+  case INTERCOM_ACK_WAIT:
+    if (ack_pending == TRUE)
+    {
+      mqtt_intercom__state = INTERCOM_IDLE;
+      ack_pending = FALSE;
+    }
+    break;
+  default:
+    break;
+  }
 #ifdef DEBUG_M4_ONLY
   }
 #endif
@@ -122,16 +122,16 @@ void mqtt_intercom__handle(void)
 // Flag for M7 to show that M4 Core is ready for communication
 uint8_t mqtt_intercom__set_m4_ready(void)
 {
-  printf("set_ready command...");
+  //printf("set_ready command...");
   if (m4_ready_pending == FALSE)
   {
-    printf("Successful\n!");
+    //printf("Successful\n!");
     m4_ready_pending = TRUE;
     return TRUE;
   }
   else
   {
-    printf("Error!\n");
+    //printf("Error!\n");
     return FALSE;
   }
 }
@@ -139,18 +139,32 @@ uint8_t mqtt_intercom__set_m4_ready(void)
 uint8_t mqtt_intercom__send(intercom_data_t *data)
 {
   //  printf("Intercom Mx: Send data. Going to send.\n");
-  printf("send command...");
+  //printf("send command...");
   if (send_pending == FALSE)
   {
-    printf("Successful\n!");
+    //printf("Successful\n!");
     send_pending = TRUE;
     memcpy(&temp_data, data, sizeof(intercom_data_t));
   }
   else
   {
-    printf("Error!\n");
+    //printf("Error!\n");
     return FALSE;
   }
+}
+
+uint8_t mqtt_intercom__send_blocking(intercom_data_t *data, uint32_t timeout)
+{
+  uint32_t ts = HAL_GetTick();
+  while (mqtt_intercom__send(data) == FALSE)
+  {
+    mqtt_intercom__handle();
+    if (HAL_GetTick() - ts > timeout)
+    {
+      return FALSE;
+    }
+  }
+  return TRUE;
 }
 
 void mqtt_intercom__hsem_it(void)
@@ -199,17 +213,6 @@ static inline void hsem_release()
   __HAL_HSEM_CLEAR_FLAG(__HAL_HSEM_SEMID_TO_MASK(INTERCOM_HSEM));
   HAL_NVIC_ClearPendingIRQ(HSEMx_IRQn);
   HAL_NVIC_EnableIRQ(HSEMx_IRQn);
-}
-
-void print_hsem_flags()
-{
-  //uint32_t addr = HSEM_COMMON;
-  uint32_t ier = HSEM_COMMON->IER;
-  //uint32_t icr = HSEM_COMMON->ICR;
-  uint32_t isr = HSEM_COMMON->ISR;
-  uint32_t misr = HSEM_COMMON->MISR;
-
-  printf("\nIER: 0x%08x\nISR: 0x%08x\nMISR: 0x%08x\n", ier, isr, misr);
 }
 
 __weak void mqtt_intercom__receive_cb(intercom_data_t *data)

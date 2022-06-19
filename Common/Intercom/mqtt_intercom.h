@@ -58,6 +58,7 @@ uint8_t mqtt_intercom__init(uint8_t erase);
 void mqtt_intercom__handle(void);
 uint8_t mqtt_intercom__set_m4_ready(void);
 uint8_t mqtt_intercom__send(intercom_data_t *data);
+uint8_t mqtt_intercom__send_blocking(intercom_data_t *data, uint32_t timeout);
 void mqtt_intercom__hsem_it(void);
 void mqtt_intercom__receive_cb(intercom_data_t * data);
 void print_hsem_flags();

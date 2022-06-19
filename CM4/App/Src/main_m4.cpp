@@ -34,7 +34,11 @@ int main(void)
   MX_USART6_UART_Init();
   printf("\n\n\nHello from M4! (%s)\n", __TIME__);
 
+#ifdef LOCAL_CONNECTION
   IP4_ADDR(&host, 10, 20, 30, 1);
+#else
+  IP4_ADDR(&host, 144, 2, 69, 24);
+#endif
 
   MX_LWIP_Init();
   printf("LWIP initialized\n");
