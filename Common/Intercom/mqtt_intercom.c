@@ -66,6 +66,7 @@ void mqtt_intercom__handle(void)
       printf("IC: M4 rdy\n");
       intercom_data.cmd = M4_READY;
       hsem_release();
+      m4_ready_pending = FALSE;
       mqtt_intercom__state = INTERCOM_ACK_WAIT;
     }
     break;
@@ -75,6 +76,7 @@ void mqtt_intercom__handle(void)
       printf("IC: send\n");
       memcpy(&intercom_data, &temp_data, sizeof(intercom_data_t));
       hsem_release();
+      send_pending = FALSE;
       mqtt_intercom__state = INTERCOM_ACK_WAIT;
     }
     break;
@@ -84,6 +86,7 @@ void mqtt_intercom__handle(void)
       printf("IC: receive\n");
       mqtt_intercom__receive_cb(&intercom_data);
       hsem_release();
+      receive_pending = FALSE;
       mqtt_intercom__state = INTERCOM_IDLE;
     }
     break;
@@ -91,17 +94,14 @@ void mqtt_intercom__handle(void)
     if (send_pending == TRUE)
     {
       mqtt_intercom__state = INTERCOM_SEND;
-      send_pending = FALSE;
     }
     if (m4_ready_pending == TRUE)
     {
       mqtt_intercom__state = INTERCOM_M4_READY;
-      m4_ready_pending = FALSE;
     }
     if (receive_pending == TRUE)
     {
       mqtt_intercom__state = INTERCOM_RECEIVE;
-      receive_pending = FALSE;
     }
     break;
   case INTERCOM_ACK_WAIT:
@@ -145,6 +145,7 @@ uint8_t mqtt_intercom__send(intercom_data_t *data)
     //printf("Successful\n!");
     send_pending = TRUE;
     memcpy(&temp_data, data, sizeof(intercom_data_t));
+    return TRUE;
   }
   else
   {
@@ -157,6 +158,15 @@ uint8_t mqtt_intercom__send_blocking(intercom_data_t *data, uint32_t timeout)
 {
   uint32_t ts = HAL_GetTick();
   while (mqtt_intercom__send(data) == FALSE)
+  {
+    mqtt_intercom__handle();
+    if (HAL_GetTick() - ts > timeout)
+    {
+      return FALSE;
+    }
+  }
+  // Call handler until transmission (incl. ACK) is complete
+  while ((mqtt_intercom__state != INTERCOM_IDLE) || (send_pending == TRUE))
   {
     mqtt_intercom__handle();
     if (HAL_GetTick() - ts > timeout)
