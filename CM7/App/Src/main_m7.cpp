@@ -25,31 +25,34 @@
 void bootSystem(void);
 
 Looper looper = Looper();
+#ifdef DEBUG_M4_ONLY
+volatile uint8_t isM4Ready = 0;
+#endif
 
 int main(void)
 {
   bootSystem();
+  mqtt_intercom__init(TRUE);
 
   /* Initialize all peripherals */
   MX_GPIO_Init();
   MX_USART3_UART_Init();
-  printf("Hello from M7! (%s)\n", __TIME__);
+  printf("\n\n\nHello from M7! (%s)\n", __TIME__);
 
   MX_USB_OTG_FS_PCD_Init();
   MX_I2C1_Init();
   MX_SPI5_Init();
-
-  printf("Wait 10s...\n");
-  HAL_Delay(10000);
-  printf("Done\n");
-
-  mqtt_intercom__init();
 
 #ifndef DEBUG_M4_ONLY // Used to exclude M7 from running game to help debug M4 Core
  // Looper looper = Looper();
   looper.run();
 #endif
 
+  printf("Wait for M4 Core Ready\n");
+  while (isM4Ready == 0)
+  {
+    mqtt_intercom__handle();
+  }
   intercom_data_t mqtt_data;
   mqtt_data.cmd = MQTT_SUBSCRIBE;
   sprintf((char*) &mqtt_data.topic, "data_to_m7");
@@ -58,6 +61,9 @@ int main(void)
 //  uint32_t count = 0;
   while (1)
   {
+    mqtt_intercom__handle();
+//    print_hsem_flags();
+//    HAL_Delay(500);
 //    /* This is where the interrupt would be generated. */
 //
 //    count++;
@@ -106,20 +112,41 @@ void bootSystem(void)
 
 void HAL_HSEM_FreeCallback(uint32_t SemMask)
 {
-  printf("HSEM M7: FreeCallback!\n");
-  if (SemMask & __HAL_HSEM_SEMID_TO_MASK(HSEM_INTERCOM))
+
+  if (SemMask & __HAL_HSEM_SEMID_TO_MASK(INTERCOM_HSEM))
   {
-    printf("Intercom M7: HSEM IT Callback\n");
+    printf("it\n");
     mqtt_intercom__hsem_it();
   }
+  // Re-enable the HSEM interrupt because HAL handler is disabling it...
+  HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(INTERCOM_HSEM));
 }
 
 void mqtt_intercom__receive_cb(intercom_data_t *data)
 {
-  printf("Intercom M7: Receive intercom command '%d'", data->cmd);
+#ifdef DEBUG_M4_ONLY
   // Interpret command
   HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
-#ifndef DEBUG_M4_ONLY // Used to exclude M7 from running game to help debug M4 Core
+  switch (data->cmd)
+  {
+  case MQTT_RECEIVE:
+    printf("Intercom M7: Receive command 'MQTT_RECEIVE'\n");
+    printf("Data:\n%s\n", (char*) &data->data);
+    break;
+  case M4_READY:
+    isM4Ready = 1;
+    printf("Intercom M7: Receive command 'M4_READY'\n");
+    break;
+  case ERROR_CMD:
+    HSEM_COMMON->ICR = (__HAL_HSEM_SEMID_TO_MASK(INTERCOM_HSEM));
+    printf("Intercom M7: Reset interrupt ('ERROR_CMD')\n");
+    break;
+  default:
+    printf("Intercom M7: Invalid command: %d\n", data->cmd);
+    break;
+  }
+
+#else // Used to exclude M7 from running game to help debug M4 Core
   std::string topic = "test";
 
   switch (data->cmd)

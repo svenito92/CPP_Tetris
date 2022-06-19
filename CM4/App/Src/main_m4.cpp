@@ -22,42 +22,46 @@
 static void bootSystem(void);
 static void setupExternalInterrupts(void);
 
-volatile uint32_t msTime;
-
 int main(void)
 {
+  ip_addr_t host;
+
   bootSystem();
 
   /* Initialize all peripherals */
   MX_GPIO_Init();
-  MX_USART3_UART_Init();
-  printf("Hello from M4! (%s)",__TIME__);
+  //MX_USART3_UART_Init();
+  MX_USART6_UART_Init();
+  printf("\n\n\nHello from M4! (%s)\n", __TIME__);
 
-  setupExternalInterrupts();
+  IP4_ADDR(&host, 10, 20, 30, 1);
 
   MX_LWIP_Init();
   printf("LWIP initialized\n");
 
-  // Wait sometime for dhcp bind
+
+  // Wait for dhcp bind
   while (ethernetif_dhcp_state != DHCP_STATE_BOUND)
   {
     MX_LWIP_Process();
   }
 
-  ip_addr_t host;
-  IP4_ADDR(&host, 10, 20, 30, 1);
+  mqtt_intercom__init(FALSE); // Init intercom without erasing
+
+  MX_LWIP_Process();
 
   mqtt_m4__init(host, 1883, "tetris_test");
-  mqtt_m4__connect();
-  mqtt_m4__subscribe("test_subscribe", 0);
-  mqtt_m4__publish("tetris_publish", (uint8_t*) &host, sizeof(ip_addr_t), MQTT_M4__QOS_MAX_ONCE, MQTT_M4__NO_RETAIN);
+  MX_LWIP_Process();
 
-  mqtt_intercom__init();
+  mqtt_m4__connect();
+  MX_LWIP_Process();
+
+  mqtt_intercom__set_m4_ready(); // Will be executed only when mqtt_intercom__handle() is called at least twice!
 
   while (1)
   {
-    msTime = HAL_GetTick();
     MX_LWIP_Process();
+    mqtt_intercom__handle();
   }
 }
 
@@ -105,16 +109,18 @@ void setupExternalInterrupts(void)
 
 void HAL_HSEM_FreeCallback(uint32_t SemMask)
 {
-  printf("HSEM M4: FreeCallback!\n");
-  if(SemMask & __HAL_HSEM_SEMID_TO_MASK(HSEM_INTERCOM))
+  if (SemMask & __HAL_HSEM_SEMID_TO_MASK(INTERCOM_HSEM))
   {
-      mqtt_intercom__hsem_it();
+    printf("it\n");
+    mqtt_intercom__hsem_it();
   }
+  // Re-enable the HSEM interrupt because HAL handler is disabling it...
+  HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(INTERCOM_HSEM));
 }
 
-void mqtt_intercom__receive_cb(intercom_data_t * data)
+void mqtt_intercom__receive_cb(intercom_data_t *data)
 {
-  switch(data->cmd)
+  switch (data->cmd)
   {
   case MQTT_PUBLISH:
     mqtt_m4__publish(data->topic, data->data, data->data_length, MQTT_M4__QOS_MIN_ONCE, MQTT_M4__NO_RETAIN);
@@ -129,5 +135,4 @@ void mqtt_intercom__receive_cb(intercom_data_t * data)
   printf("Intercom M4: Receive callback\n");
   // Interpret command
 }
-
 
