@@ -29,6 +29,12 @@ public:
   void run();
   bool gameStartFlag = false;
   bool interCoreComReady = false;
+  uint8_t playerIds[20] = {0};
+  uint8_t gameOverPlayerIds[20] = {0};
+  uint8_t gameWonPlayerId = 0;
+  bool gameWonFlag=false;
+  uint8_t insertLines=0;
+  uint8_t playerNr = 2; // Player 1 = Master
 
   // Enums
   enum ProcessState
@@ -128,11 +134,12 @@ private:
   bool gameRunning;
   uint8_t role; // 1 = Master, 2 = Player
   bool roleMenu;
-  uint8_t playerNr = 1;
+
   uint8_t buttonPressed;
   uint8_t activePlayers=0;
+
   uint8_t gameMode=0; // 1 = Singelplayer, 2 = Multiplayer
-  bool gameWonFlag=false;
+
 
   // bool moveBlockOnBottom = true;
 

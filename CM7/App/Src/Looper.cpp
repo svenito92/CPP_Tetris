@@ -419,21 +419,21 @@ void Looper::stateSetMpSettings(){
 			HAL_Delay(200);
 		 }
 		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_RIGHT)){
-			if(playerNr > 1){									// Player 0  is Master
+			if(playerNr > 2){									// Player 1  is Master
 				playerNr--;
 			}
 			processState = gameSettingsMpDrawScreen;
 			HAL_Delay(200);
 		 }
 		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_DOWN)){
-			if(playerNr > 10){									// Player 0  is Master
+			if(playerNr > 11){									// Player 1  is Master
 				playerNr=playerNr-10;
 			}
 			processState = gameSettingsMpDrawScreen;
 			HAL_Delay(200);
 		 }
 		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_UP)){
-			if(playerNr < 246){									// Player 0  is Master
+			if(playerNr < 246){									// Player 1  is Master
 				playerNr=playerNr+10;
 			}
 			processState = gameSettingsMpDrawScreen;
