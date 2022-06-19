@@ -153,8 +153,12 @@ bool Playground::isOverflow() {
 // check is block on bottom
 bool Playground::isOnBottom(uint8_t *blockArray) {
 	for (uint8_t i = 0; i < 4; i++) {
-		if (fields[(*blockArray + ROWS)] != 0)
+		if(blockArray[i]>=200){
 			return true;
+		}
+		else if (fields[(*blockArray + ROWS)] != 0){
+			return true;
+		}
 		blockArray++;
 	}
 	return false;

@@ -41,7 +41,8 @@ public:
     gameSettingsMp = 30,
 	gameSettingsMpDrawScreen = 31,
 	waitOnStart =32,
-	initializeCom = 33,
+	initializeComAndScreen = 33,
+	WaitOnStartScreen=34,
     singlePlayer = 40,
     multiPlayer = 50,
     gameOver = 60,
@@ -125,7 +126,7 @@ private:
   uint16_t blocksInGame;
   uint16_t blocksPerTypeInGame[7];
   bool gameRunning;
-  uint8_t role;
+  uint8_t role; // 1 = Master, 2 = Player
   bool roleMenu;
   uint8_t playerNr = 1;
   uint8_t buttonPressed;
@@ -167,6 +168,7 @@ private:
   void stateSpawnBlock();
   void stateUpdateScreen();
   void stateWaitOnStart();
+  void stateWaitOnStartScreen();
   void stateInitializeCom();
   void stateGameOver();
   // transition requirements from states
