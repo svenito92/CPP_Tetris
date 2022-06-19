@@ -52,11 +52,12 @@ uint8_t mqtt_intercom__init(uint8_t erase)
 // State Machine
 void mqtt_intercom__handle(void)
 {
+#ifdef DEBUG_M4_ONLY
   if (HAL_GetTick() - timestamp > 100)
   {
     timestamp = HAL_GetTick();
     printf("IC State: %s\n", states[mqtt_intercom__state]);
-
+#endif
     switch (mqtt_intercom__state)
     {
     case INTERCOM_M4_READY:
@@ -113,7 +114,9 @@ void mqtt_intercom__handle(void)
     default:
       break;
     }
+#ifdef DEBUG_M4_ONLY
   }
+#endif
 }
 
 // Flag for M7 to show that M4 Core is ready for communication

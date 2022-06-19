@@ -43,11 +43,7 @@ int main(void)
   MX_I2C1_Init();
   MX_SPI5_Init();
 
-#ifndef DEBUG_M4_ONLY // Used to exclude M7 from running game to help debug M4 Core
- // Looper looper = Looper();
-  looper.run();
-#endif
-
+#ifdef DEBUG_M4_ONLY // Used to exclude M7 from running game to help debug M4 Core
   printf("Wait for M4 Core Ready\n");
   while (isM4Ready == 0)
   {
@@ -62,18 +58,11 @@ int main(void)
   while (1)
   {
     mqtt_intercom__handle();
-//    print_hsem_flags();
-//    HAL_Delay(500);
-//    /* This is where the interrupt would be generated. */
-//
-//    count++;
-//    sprintf((char*)&mqtt_data.data, "%0*ld", 10, count);
-//
-//    mqtt_intercom__send(&mqtt_data);
-////    while (HAL_HSEM_FastTake(HSEM_INTERCOM) != HAL_OK);
-////    HAL_HSEM_Release(HSEM_INTERCOM, 0);
-//    HAL_Delay(5000);
   }
+#else
+  // Looper looper = Looper();
+  looper.run();
+#endif
 }
 
 void bootSystem(void)
