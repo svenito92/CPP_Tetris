@@ -27,7 +27,7 @@ void Looper::run() {
 	processState = init;
 	while (true) {
 		buttons = ss.readButtons();
-		mqtt_intercom__handle();
+		mqtt_intercom__handler();
 		switch (processState)
 		 {
 		 case init:
@@ -47,6 +47,7 @@ void Looper::run() {
 			roleMenu = true;
 			role = 0;
 			activePlayers=0;
+			gameStartFlag=0;
 
 			// test->cmd = MQTT_RECEIVE;
 			// sprintf((char*)&test->topic,"test");
@@ -574,7 +575,7 @@ void Looper::stateKillLine() {
 			writeScore(score, ST7735_BLUE);
 		}
 	}
-	if(gameMode == 2){
+	if(gameMode == 2){			// Multiplayer
 		oldKilledLines= killedLines-oldKilledLines+openKilledLines;
 		while(oldKilledLines!= 0){
 			if(oldKilledLines > (activePlayers-gameOverPlayers)){
@@ -722,6 +723,12 @@ void Looper::stateWaitOnStart(){
 	if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_3)){
 		btnReleased((uint32_t)TFTSHIELD_BUTTON_3);
 		ST7735_FillScreen(ST7735_BLACK);
+		data->cmd = MQTT_PUBLISH;
+		sprintf((char*)&data->topic,"Players");
+		data->data_length = 2;
+		data->data[0] = playerNr;
+		data->data[1]= 0x00;
+		mqtt_intercom__send_blocking(data, 1000);
 		processState = 	gameSettingsMpDrawScreen;
 
 	}
@@ -751,8 +758,9 @@ void Looper::stateWaitOnStart(){
 			playerIdUpdate = HAL_GetTick();
 			data->cmd = MQTT_PUBLISH;
 			sprintf((char*)&data->topic,"Players");
-			data->data_length = 1;
+			data->data_length = 2;
 			data->data[0] = playerNr;
+			data->data[1]= 0x01;
 			mqtt_intercom__send_blocking(data, 1000);
 		}
 	}

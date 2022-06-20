@@ -168,7 +168,7 @@ uint8_t mqtt_intercom__send_blocking(intercom_data_t *data, uint32_t timeout)
   // Call handler until transmission (incl. ACK) is complete
   while ((mqtt_intercom__state != INTERCOM_IDLE) || (send_pending == TRUE))
   {
-    mqtt_intercom__handle();
+    mqtt_intercom__handler();
     if (HAL_GetTick() - ts > timeout)
     {
       return FALSE;
