@@ -156,39 +156,43 @@ void mqtt_intercom__receive_cb(intercom_data_t *data)
 		}
 		else if (strcmp((const char*)data->topic,"Players") == 0){
 			i=0;
-			while(i<20){
-				if((data->data[0]!=looper.playerIds[i])&&(looper.playerIds[i]!=0)){
-					i++;
-				}
-				else{
-					if(data->data[1]==0){
-						while(looper.playerIds[i]!=0){
-							looper.playerIds[i]=looper.playerIds[i+1];
-							i++;
-						}
-						i=20;
+			if(data->data[0]!=looper.playerNr){
+				while(i<20){
+					if((data->data[0]!=looper.playerIds[i])&&(looper.playerIds[i]!=0)){
+						i++;
 					}
 					else{
-						looper.playerIds[i]=data->data[0];
-						i=20;
+						if(data->data[1]==0){
+							while(looper.playerIds[i]!=0){
+								looper.playerIds[i]=looper.playerIds[i+1];
+								i++;
+							}
+							i=20;
+						}
+						else{
+							looper.playerIds[i]=data->data[0];
+							i=20;
+						}
 					}
 				}
 			}
 		}
 		else if (strcmp((const char*)data->topic,"KillLine") == 0){
 			if(data->data[0]!=looper.playerNr){
-				looper.insertLines=looper.insertLines + data->data[1];
+				looper.toInsertLines=looper.toInsertLines + (uint32_t)data->data[1];
 			}
 		}
 		else if (strcmp((const char*)data->topic,"GameOver") == 0){
 			i=0;
-			while(i<20){
-				if((data->data[0]!=looper.gameOverPlayerIds[i])&&(looper.gameOverPlayerIds[i]!=0)){
-					i++;
-				}
-				else{
-					looper.gameOverPlayerIds[i]=data->data[0];
-					i=20;
+			if(data->data[0]!=looper.playerNr){
+				while(i<20){
+					if((data->data[0]!=looper.gameOverPlayerIds[i])&&(looper.gameOverPlayerIds[i]!=0)){
+						i++;
+					}
+					else{
+						looper.gameOverPlayerIds[i]=data->data[0];
+						i=20;
+					}
 				}
 			}
 		}

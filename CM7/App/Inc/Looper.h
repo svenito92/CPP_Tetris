@@ -33,7 +33,7 @@ public:
   uint8_t gameOverPlayerIds[20] = {0};
   uint8_t gameWonPlayerId = 0;
   bool gameWonFlag=false;
-  uint8_t insertLines=0;
+  uint32_t toInsertLines=0;
   uint8_t playerNr = 2; // Player 1 = Master
 
   // Enums
@@ -48,7 +48,6 @@ public:
 	gameSettingsMpDrawScreen = 31,
 	waitOnStart =32,
 	initializeComAndScreen = 33,
-	WaitOnStartScreen=34,
     singlePlayer = 40,
     multiPlayer = 50,
     gameOver = 60,
@@ -117,9 +116,10 @@ private:
   uint32_t moveBlockTimer = 80;	// in ms
   const uint32_t INIT_BLOCK_DOWN_CNT = 1000; // 1000ms
   uint32_t blockDownCnt = INIT_BLOCK_DOWN_CNT; // numbers of moves before move block one field down
-  uint32_t timer;		// when timer "overflows" move block
-  uint32_t counter;		// counts how often the move timer overflowed
-  uint32_t updateScreenCounter;
+  uint32_t timer=0;		// when timer "overflows" move block
+  uint32_t counter=0;		// counts how often the move timer overflowed
+  uint32_t updateScreenCounter=0;
+  uint32_t gameWonCheckCounter=0;
   uint32_t playerIdUpdate=0;
   uint32_t gameOverUpdate=0;
   uint16_t scoreRanking[10];
@@ -134,9 +134,11 @@ private:
   bool gameRunning;
   uint8_t role; // 1 = Master, 2 = Player
   bool roleMenu;
+  uint32_t insertedLines=0;
 
   uint8_t buttonPressed;
   uint8_t activePlayers=0;
+  uint8_t gameOverPlayers=0;
 
   uint8_t gameMode=0; // 1 = Singelplayer, 2 = Multiplayer
 
