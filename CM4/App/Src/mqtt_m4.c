@@ -16,7 +16,9 @@ static mqtt_client_t *_client;
 static ip_addr_t _host;
 static uint16_t _port;
 static const char *_client_id;
-static char topic[MQTT_M4__MAX_TOPIC_LENGTH];
+static char _topic[MQTT_M4__MAX_TOPIC_LENGTH];
+static mqtt_m4_msg_t _messageBuffer[MQTT_M4__MESSAGE_BUFFER_LENGTH];
+static uint8_t _messageCount;
 
 // Private function declaration
 static void mqtt_m4__connection_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status);
@@ -31,6 +33,10 @@ void mqtt_m4__init(ip_addr_t host, uint16_t port, const char *client_id)
   _port = port;
   _client_id = client_id;
 
+  // Clear message Buffer
+  _messageCount = 0;
+  memset(_messageBuffer, 0x00, MQTT_M4__MESSAGE_BUFFER_LENGTH * sizeof(mqtt_m4_msg_t));
+
   _client = mqtt_client_new();
   if (_client != NULL)
   {
@@ -39,6 +45,30 @@ void mqtt_m4__init(ip_addr_t host, uint16_t port, const char *client_id)
   else
   {
     printf("MQTT M4: Client memory NOT initialised\n");
+  }
+}
+
+void mqtt_m4__handler()
+{
+  intercom_data_t mqtt_data;
+  uint16_t length = _messageBuffer[_messageCount - 1].length;
+  uint8_t successfulSend;
+
+  if (_messageCount > 0)
+  {
+    mqtt_data.cmd = MQTT_RECEIVE;
+    mqtt_data.data_length = length;
+    strcpy((char*) mqtt_data.data, _messageBuffer[_messageCount - 1].topic);
+    if (length > 0)
+    {
+      memcpy(mqtt_data.data, _messageBuffer[_messageCount - 1].message, length);
+    }
+    printf("MQTT M4: Intercom send from buffer\n");
+    successfulSend = mqtt_intercom__send(&mqtt_data);
+    if (successfulSend == TRUE)
+    {
+      _messageCount--;
+    }
   }
 }
 
@@ -51,7 +81,7 @@ void mqtt_m4__connect()
   memset(&client_info, 0, sizeof(client_info));
   client_info.client_id = _client_id;
 
-  err = mqtt_client_connect(_client, &_host, _port, mqtt_m4__connection_cb, (void*) &topic, &client_info);
+  err = mqtt_client_connect(_client, &_host, _port, mqtt_m4__connection_cb, (void*) &_topic, &client_info);
   if (err != ERR_OK)
   {
     printf("MQTT M4: mqtt_connect error: %d\n", err);
@@ -138,6 +168,7 @@ static void mqtt_m4__incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8
 {
   char *topic_buf = (char*) arg;
   intercom_data_t mqtt_data;
+  uint8_t successfulSend;
 
   printf("MQTT M4: Incoming data callback! Length: %d\n", len);
 
@@ -151,14 +182,27 @@ static void mqtt_m4__incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8
 
     mqtt_data.cmd = MQTT_RECEIVE;
     mqtt_data.data_length = len;
-    strcpy((char*) &mqtt_data.data, topic_buf);
+    strcpy((char*) mqtt_data.topic, topic_buf);
     if (len > 0)
     {
-      memcpy(&mqtt_data.data, data, len);
+      memcpy(mqtt_data.data, data, len);
     }
-    printf("MQTT M4: Intercom send...");
-    mqtt_intercom__send(&mqtt_data);
-    printf("Done\n");
+    printf("MQTT M4: Intercom send...\n");
+    successfulSend = mqtt_intercom__send(&mqtt_data);
+    if (successfulSend == FALSE)
+    {
+      if (_messageCount < MQTT_M4__MESSAGE_BUFFER_LENGTH - 1)
+      {
+        _messageCount++;
+        _messageBuffer[_messageCount].length = len;
+        strcpy(_messageBuffer[_messageCount].topic, topic_buf);
+        memcpy(_messageBuffer[_messageCount].message, data, len);
+      }
+      else
+      {
+        printf("MQTT M4: Message Buffer Overflow!!!\n");
+      }
+    }
   }
   else
   {

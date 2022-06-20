@@ -20,7 +20,7 @@ extern "C"
 #define INTERCOM_TIMEOUT 1000
 #define INTERCOM_MEM_SIZE 1024
 #define INTERCOM_TOPIC_MAX_LENGTH 128
-#define INTERCOM_DATA_MAX_LENGTH 512
+#define INTERCOM_DATA_MAX_LENGTH 128
 
 #ifdef CORE_CM4 //Set interrupts according to how HAL library handles it
 #define HSEMx_IRQn HSEM2_IRQn
@@ -47,7 +47,6 @@ typedef enum
 
 typedef struct
 {
-  uint32_t isInitialized;
   intercom_cmd_t cmd;
   uint16_t data_length;
   char topic[INTERCOM_TOPIC_MAX_LENGTH];
@@ -55,7 +54,7 @@ typedef struct
 } intercom_data_t;
 
 uint8_t mqtt_intercom__init(uint8_t erase);
-void mqtt_intercom__handle(void);
+void mqtt_intercom__handler(void);
 uint8_t mqtt_intercom__set_m4_ready(void);
 uint8_t mqtt_intercom__send(intercom_data_t *data);
 uint8_t mqtt_intercom__send_blocking(intercom_data_t *data, uint32_t timeout);

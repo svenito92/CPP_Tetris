@@ -50,7 +50,7 @@ uint8_t mqtt_intercom__init(uint8_t erase)
 }
 
 // State Machine
-void mqtt_intercom__handle(void)
+void mqtt_intercom__handler(void)
 {
 #ifdef DEBUG_M4_ONLY
   if (HAL_GetTick() - timestamp > 100)
@@ -159,7 +159,7 @@ uint8_t mqtt_intercom__send_blocking(intercom_data_t *data, uint32_t timeout)
   uint32_t ts = HAL_GetTick();
   while (mqtt_intercom__send(data) == FALSE)
   {
-    mqtt_intercom__handle();
+    mqtt_intercom__handler();
     if (HAL_GetTick() - ts > timeout)
     {
       return FALSE;
