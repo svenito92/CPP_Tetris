@@ -23,9 +23,20 @@ extern "C"
 #define MQTT_M4__QOS_EXACT_ONCE 2
 
 #define MQTT_M4__MAX_TOPIC_LENGTH 128
+#define MQTT_M4__MAX_DATA_LENGTH 128
+
+#define MQTT_M4__MESSAGE_BUFFER_LENGTH 10
+
+typedef struct
+{
+  uint16_t length;
+  char topic[MQTT_M4__MAX_TOPIC_LENGTH];
+  char message[MQTT_M4__MAX_DATA_LENGTH];
+} mqtt_m4_msg_t;
 
 
 void mqtt_m4__init(ip_addr_t host, uint16_t port, const char *client_id);
+void mqtt_m4__handler();
 void mqtt_m4__connect();
 void mqtt_m4__subscribe(const char *topic, uint8_t qos);
 void mqtt_m4__publish(const char *topic, uint8_t *buf, uint16_t len, uint8_t qos, uint8_t retain);

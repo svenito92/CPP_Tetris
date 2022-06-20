@@ -52,12 +52,23 @@ int main(void)
   {
     MX_LWIP_Process();
   }
+  const ip4_addr_t *ip_addr = netif_ip4_addr(&gnetif);
+  uint32_t ip = ip_addr->addr;
+  char ipStr[16];
+  sprintf(ipStr, "%d.%d.%d.%d",
+      (uint8_t)(ip >> 0) & 0xFF,
+      (uint8_t)(ip >> 8) & 0xFF,
+      (uint8_t)(ip >>16) & 0xFF,
+      (uint8_t)(ip >>24) & 0xFF);
+  printf("Got IP address: %s\n", (const char *)&ipStr);
 
   mqtt_intercom__init(FALSE); // Init intercom without erasing
 
   MX_LWIP_Process();
 
-  mqtt_m4__init(host, port, "tetris_test");
+  char clientName[30];
+  sprintf(clientName, "tetris_%s", (const char *)ipStr);
+  mqtt_m4__init(host, port, (const char *)clientName);
   MX_LWIP_Process();
 
   mqtt_m4__connect();
@@ -68,7 +79,8 @@ int main(void)
   while (1)
   {
     MX_LWIP_Process();
-    mqtt_intercom__handle();
+    mqtt_m4__handler();
+    mqtt_intercom__handler();
   }
 }
 
