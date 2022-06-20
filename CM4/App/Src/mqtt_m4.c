@@ -182,7 +182,7 @@ static void mqtt_m4__incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8
 
     mqtt_data.cmd = MQTT_RECEIVE;
     mqtt_data.data_length = len;
-    strcpy((char*) mqtt_data.data, topic_buf);
+    strcpy((char*) mqtt_data.topic, topic_buf);
     if (len > 0)
     {
       memcpy(mqtt_data.data, data, len);
