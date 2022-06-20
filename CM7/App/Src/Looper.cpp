@@ -27,7 +27,7 @@ void Looper::run() {
 	processState = init;
 	while (true) {
 		buttons = ss.readButtons();
-		mqtt_intercom__handle();
+		mqtt_intercom__handler();
 		switch (processState)
 		 {
 		 case init:
