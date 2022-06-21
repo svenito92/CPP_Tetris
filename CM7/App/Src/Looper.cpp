@@ -219,6 +219,7 @@ void Looper::runGame() {
 			HAL_UART_Transmit(&huart3,(const uint8_t*)"Insert line\r\n", 12, 0xFFFF);
 			// CHECK HOW MANY LINES
 			tempToInsertLine = toInsertLines;
+			if(tempToInsertLine!=insertedLines){
 			for(uint32_t i=0; i<(tempToInsertLine-insertedLines); i++){
 				playground.insertLine(calculations.getRdmSpaceInNewLine());
 
@@ -231,6 +232,9 @@ void Looper::runGame() {
 				}
 			}
 			insertedLines=tempToInsertLine;
+			}else{
+				gameState = generateNewBlock;
+			}
 			break;
 		case spawnblock:
 			HAL_UART_Transmit(&huart3,(const uint8_t*)"Spawn block\r\n", 12, 0xFFFF);
