@@ -25,7 +25,7 @@ public:
     // seter methods
     void rstPlayground();
     void killLine(uint8_t line);
-    void insertLine(uint8_t rdmSpace);
+    void insertLine(uint8_t* rdmSpace);
     void setField(uint8_t fieldNo, uint8_t blockType);
 
     // checking methots

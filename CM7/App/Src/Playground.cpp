@@ -106,18 +106,17 @@ void Playground::killLine(uint8_t lineNo) {
 }
 
 // Insert a Line with a randnom space on the bottom
-void Playground::insertLine(uint8_t rdmSpace) {
-
+void Playground::insertLine(uint8_t* rdmSpace) {
 	// move all blocks one row up
 	for (uint8_t i = 0; i <= MAX_FIELD_NO - ROWS; i++) {
 		fields[i] = fields[i + ROWS];
 	}
 	// insert line on bottom
-	for (uint8_t j = LINES * ROWS - ROWS; j <= MAX_FIELD_NO; j++) {
-		if (rdmSpace == j) {
-			fields[j] = 0;
+	for (uint8_t j = 0; j <= 9; j++) {
+		if (rdmSpace[j]) {
+			fields[j+200] = 8;
 		} else {
-			fields[j] = 8;	// => 8 = eingefügte Blöcke
+			fields[j+200] = 0;	// => 8 = eingefügte Blöcke
 		}
 	}
 	// check overflow

@@ -154,6 +154,7 @@ void Looper::initScreen() {
 
 void Looper::runGame() {
 	uint32_t tempToInsertLine=0;
+	uint8_t randomValue[10];
 //	gameRunning = true;
 //	while (gameRunning) {
 		switch (gameState) {
@@ -221,7 +222,8 @@ void Looper::runGame() {
 			tempToInsertLine = toInsertLines;
 			if(tempToInsertLine!=insertedLines){
 			for(uint32_t i=0; i<(tempToInsertLine-insertedLines); i++){
-				playground.insertLine(calculations.getRdmSpaceInNewLine());
+				calculations.getRdmSpaceInNewLine(randomValue);
+				playground.insertLine(randomValue);
 
 				if (playground.isOverflow()) {
 					finalizeGame();
@@ -758,7 +760,7 @@ void Looper::stateWaitOnStart(){
 	}
 	else{
 		processState = 	waitOnStart;
-		if(HAL_GetTick()-playerIdUpdate >= 500) {
+		if(HAL_GetTick()-playerIdUpdate >= 2000) {
 			playerIdUpdate = HAL_GetTick();
 			data->cmd = MQTT_PUBLISH;
 			sprintf((char*)&data->topic,"Players");
@@ -789,13 +791,16 @@ intercom_data_t *data=0;
 		data->cmd = MQTT_SUBSCRIBE;
 		sprintf((char*)&data->topic,"GameWon");
 		mqtt_intercom__send_blocking(data, 1000);
+		data->cmd = MQTT_SUBSCRIBE;
+		sprintf((char*)&data->topic,"Test");
+		mqtt_intercom__send_blocking(data, 1000);
 	}
 }
 
 void Looper::stateGameOver(){
 	intercom_data_t *data=0;
 	if(gameMode == 2){	// Multiplayer
-		if(HAL_GetTick()-gameOverUpdate >= 500) {
+		if(HAL_GetTick()-gameOverUpdate >= 2000) {
 			gameOverUpdate = HAL_GetTick();
 			data->cmd = MQTT_PUBLISH;
 			sprintf((char*)&data->topic,"GameOver");
@@ -832,7 +837,7 @@ void Looper::testFct() {
 		stateKillLine();
 
 		// PUSH BUTTON
-		playground.insertLine(3);
+//		playground.insertLine(3);
 
 
 		for (uint8_t i = 0; i < 210; i++) {

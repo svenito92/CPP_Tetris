@@ -21,7 +21,7 @@ public:
 	virtual ~Calculations();
 
 	uint8_t getRdmBlock();
-	uint8_t getRdmSpaceInNewLine();
+	void getRdmSpaceInNewLine(uint8_t* pointer);
 
 
 

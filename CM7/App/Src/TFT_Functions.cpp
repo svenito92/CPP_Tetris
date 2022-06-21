@@ -321,9 +321,9 @@ uint16_t getColor(uint8_t color)
 				break;
 	case 7:		retColor = ST7735_MAGENTA;
 				break;
-	case 8: 	retColor = ST7735_WHITE;
+	case 8: 	retColor = ST7735_LIGHTGREEN;
 				break;
-	case 9:		retColor = ST7735_LIGHTGREEN;
+	case 9:		retColor = ST7735_WHITE;
 				break;
 	default:	retColor = ST7735_BLACK;
 				break;
