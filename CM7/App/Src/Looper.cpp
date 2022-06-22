@@ -20,6 +20,7 @@ Looper::~Looper() {
 void Looper::run() {
 	//HAL_UART_Transmit(&huart3,(const uint8_t*)"Start run\r\n", 10, 0xFFFF);
 	intercom_data_t *gameOverWrite = 0;
+	intercom_data_t *data = 0;
 	// init system, ethernet, screen, buttons
 	initScreen();
 //	intercom_data_t *test;
@@ -95,7 +96,14 @@ void Looper::run() {
 				 stateWaitOnStartScreen();
 			 	 processState = waitOnStart;
 			 }else if(role==1){
-				 uint8_t i=0;
+				uint8_t i=0;
+				data->cmd = MQTT_PUBLISH;
+				sprintf((char*)&data->topic,"Players");
+				data->data_length = 2;
+				data->data[0] = playerNr;
+				data->data[1]= 0x01;
+				mqtt_intercom__send_blocking(data, 1000);
+				HAL_Delay(100);
 				gameOverWrite->cmd = MQTT_PUBLISH;
 				sprintf((char*)&gameOverWrite->topic,"StartGame");
 				gameOverWrite->data_length = 1;
@@ -737,16 +745,18 @@ void Looper::stateUpdateScreen() {
 		pointerBlockPos++;
 	}
 	drawField(unitedFieldData);
-	if(updateSpecView>=20){
-		data->cmd = MQTT_PUBLISH;
-		sprintf((char*)&data->topic,"ViewPlayer/%d",playerNr);
-		data->data_length = 200;
-		std::copy(unitedFieldData, unitedFieldData+200, data->data);
-//		data->data[]= 0x00;
-		mqtt_intercom__send_blocking(data, 1000);
-		updateSpecView=0;
-	}else{
-		updateSpecView++;
+	if(gameMode==2){
+		if(updateSpecView>=20){
+			data->cmd = MQTT_PUBLISH;
+			sprintf((char*)&data->topic,"ViewPlayer/%d",playerNr);
+			data->data_length = 200;
+			std::copy(unitedFieldData, unitedFieldData+200, data->data);
+	//		data->data[]= 0x00;
+			mqtt_intercom__send_blocking(data, 1000);
+			updateSpecView=0;
+		}else{
+			updateSpecView++;
+		}
 	}
 	setPreview(playBlocks[nextBlockNo].getBlockType());
 	gameState = idle;
