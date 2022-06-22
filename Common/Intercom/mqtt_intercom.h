@@ -20,7 +20,7 @@ extern "C"
 #define INTERCOM_TIMEOUT 1000
 #define INTERCOM_MEM_SIZE 1024
 #define INTERCOM_TOPIC_MAX_LENGTH 128
-#define INTERCOM_DATA_MAX_LENGTH 128
+#define INTERCOM_DATA_MAX_LENGTH 256
 
 #ifdef CORE_CM4 //Set interrupts according to how HAL library handles it
 #define HSEMx_IRQn HSEM2_IRQn

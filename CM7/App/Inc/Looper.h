@@ -141,8 +141,8 @@ private:
   uint8_t gameOverPlayers=0;
 
   uint8_t gameMode=0; // 1 = Singelplayer, 2 = Multiplayer
-
-
+  uint8_t holdMPGameOver=0;
+  uint8_t updateSpecView=0;
   // bool moveBlockOnBottom = true;
 
   // blocks & playgrounds

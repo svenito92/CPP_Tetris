@@ -91,8 +91,23 @@ void Looper::run() {
 			 break;
 		 case initializeComAndScreen:
 			 stateInitializeCom();
-			 stateWaitOnStartScreen();
-			 processState = waitOnStart;
+			 if(role==2){
+				 stateWaitOnStartScreen();
+			 	 processState = waitOnStart;
+			 }else if(role==1){
+				 uint8_t i=0;
+				gameOverWrite->cmd = MQTT_PUBLISH;
+				sprintf((char*)&gameOverWrite->topic,"StartGame");
+				gameOverWrite->data_length = 1;
+				gameOverWrite->data[0] = 0x01;
+				mqtt_intercom__send_blocking(gameOverWrite, 1000);
+				while((playerIds[i]!=0) && (i<20)){
+					i++;
+				}
+				activePlayers = i;
+				HAL_Delay(200);
+				processState = multiPlayer;
+			 }
 			 break;
 		 case waitOnStart:
 			 stateWaitOnStart();
@@ -105,6 +120,7 @@ void Looper::run() {
 			 break;
 		 case gameOver:
 			 writeState("GAME OVER", ST7735_BLUE);
+
 			 stateGameOver();
 			 HAL_UART_Transmit(&huart3,(const uint8_t*)"Game Over\r\n", 10, 0xFFFF);
 			 // show screen and wait a moment
@@ -403,15 +419,21 @@ void Looper::stateDrawMpScreen(){
 		HAL_Delay(300);
 	}
 	else{
-		char StringPlNr[3] = {0, 0, 0};
-//		ST7735_FillScreen(ST7735_BLACK);
-		writeTopLine("Set Pl Nr", ST7735_CYAN);
-		sprintf(StringPlNr, "%d", playerNr);
-		ST7735_FillRectangle(0x0004, 0x0022, 50, 16, ST7735_BLACK);
-		writeBtnMiddleLine(StringPlNr, ST7735_RED);
-		writeLn("A: Set Nr", ST7735_CYAN, 80);
-		writeLn("C: Back", ST7735_CYAN, 110);
-		HAL_Delay(300);
+		if(role == 2){
+			char StringPlNr[3] = {0, 0, 0};
+	//		ST7735_FillScreen(ST7735_BLACK);
+			writeTopLine("Set Pl Nr", ST7735_CYAN);
+			sprintf(StringPlNr, "%d", playerNr);
+			ST7735_FillRectangle(0x0004, 0x0022, 50, 16, ST7735_BLACK);
+			writeBtnMiddleLine(StringPlNr, ST7735_RED);
+			writeLn("A: Set Nr", ST7735_CYAN, 80);
+			writeLn("C: Back", ST7735_CYAN, 110);
+			HAL_Delay(300);
+		}else if (role == 1){
+			writeTopLine("Start Game", ST7735_CYAN);
+			writeLn("A: Start", ST7735_CYAN, 80);
+			writeLn("C: Back", ST7735_CYAN, 110);
+		}
 	}
 }
 
@@ -423,7 +445,7 @@ void Looper::stateSetMpSettings(){
 			btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
 			roleMenu = false;
 			role = 1;
-			playerNr=0;
+			playerNr=1;
 			ST7735_FillScreen(ST7735_BLACK);
 			processState = gameSettingsMpDrawScreen;
 		 }
@@ -437,7 +459,7 @@ void Looper::stateSetMpSettings(){
 		 }
 	 }
 	 else{
-		 if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_LEFT))
+		 if ((!(buttons & (uint32_t) TFTSHIELD_BUTTON_LEFT))&&(role!=1))
 		 { // button pushed
 			//btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
 			if(playerNr <255){
@@ -446,21 +468,21 @@ void Looper::stateSetMpSettings(){
 			processState = gameSettingsMpDrawScreen;
 			HAL_Delay(200);
 		 }
-		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_RIGHT)){
+		 else if((!(buttons & (uint32_t) TFTSHIELD_BUTTON_RIGHT))&&(role!=1)){
 			if(playerNr > 2){									// Player 1  is Master
 				playerNr--;
 			}
 			processState = gameSettingsMpDrawScreen;
 			HAL_Delay(200);
 		 }
-		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_DOWN)){
+		 else if((!(buttons & (uint32_t) TFTSHIELD_BUTTON_DOWN))&&(role!=1)){
 			if(playerNr > 11){									// Player 1  is Master
 				playerNr=playerNr-10;
 			}
 			processState = gameSettingsMpDrawScreen;
 			HAL_Delay(200);
 		 }
-		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_UP)){
+		 else if((!(buttons & (uint32_t) TFTSHIELD_BUTTON_UP))&&(role!=1)){
 			if(playerNr < 246){									// Player 1  is Master
 				playerNr=playerNr+10;
 			}
@@ -468,9 +490,15 @@ void Looper::stateSetMpSettings(){
 			HAL_Delay(200);
 		 }
 		 else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_1)){
-			 processState = initializeComAndScreen;
+			processState = initializeComAndScreen;
 			HAL_Delay(200);
-		 }
+		 }else if(!(buttons & (uint32_t) TFTSHIELD_BUTTON_3)){
+				processState = gameSettingsMpDrawScreen;
+				roleMenu=true;
+				role=0;
+				playerNr=2;
+				HAL_Delay(200);
+			 }
 	 }
 }
 
@@ -692,7 +720,7 @@ void Looper::changeStateIdle() {
 
 // update Screen in Blocking State
 void Looper::stateUpdateScreen() {
-
+	intercom_data_t *data=0;
 	uint8_t unitedFieldData[200]={0};
 
 	for(uint8_t i=0;i<=199; i++)
@@ -709,6 +737,17 @@ void Looper::stateUpdateScreen() {
 		pointerBlockPos++;
 	}
 	drawField(unitedFieldData);
+	if(updateSpecView>=20){
+		data->cmd = MQTT_PUBLISH;
+		sprintf((char*)&data->topic,"ViewPlayer/%d",playerNr);
+		data->data_length = 200;
+		std::copy(unitedFieldData, unitedFieldData+200, data->data);
+//		data->data[]= 0x00;
+		mqtt_intercom__send_blocking(data, 1000);
+		updateSpecView=0;
+	}else{
+		updateSpecView++;
+	}
 	setPreview(playBlocks[nextBlockNo].getBlockType());
 	gameState = idle;
 }
@@ -799,6 +838,7 @@ intercom_data_t *data=0;
 
 void Looper::stateGameOver(){
 	intercom_data_t *data=0;
+
 	if(gameMode == 2){	// Multiplayer
 		if(HAL_GetTick()-gameOverUpdate >= 2000) {
 			gameOverUpdate = HAL_GetTick();
@@ -807,9 +847,11 @@ void Looper::stateGameOver(){
 			data->data_length = 1;
 			data->data[0] = playerNr;
 			mqtt_intercom__send_blocking(data, 1000);
+			holdMPGameOver++;
 		}
-		if(gameWonFlag==1){
-
+		if((!(buttons & (uint32_t) TFTSHIELD_BUTTON_1))&&(holdMPGameOver>=4)){
+			btnReleased((uint32_t)TFTSHIELD_BUTTON_1);
+			holdMPGameOver=0;
 			processState = ranking;
 		}
 	}
