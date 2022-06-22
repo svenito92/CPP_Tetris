@@ -40,7 +40,8 @@ void Looper::run() {
 			toInsertLines = 0;
 			insertedLines=0;
 			gameOverPlayers=0;
-			memset(gameOverPlayerIds,0, 20);
+			memset(gameOverPlayerIds,0, sizeof(gameOverPlayerIds));
+			memset(playerIds,0x00,sizeof(playerIds));
 			killedLines = 0;
 			openKilledLines = 0;
 			processState = selectGameModeSetScreen;
@@ -49,6 +50,8 @@ void Looper::run() {
 			role = 0;
 			activePlayers=0;
 			gameStartFlag=0;
+
+
 
 			// test->cmd = MQTT_RECEIVE;
 			// sprintf((char*)&test->topic,"test");
