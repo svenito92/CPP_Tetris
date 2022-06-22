@@ -218,7 +218,7 @@ void Looper::runGame() {
 			HAL_UART_Transmit(&huart3,(const uint8_t*)"fix block\r\n", 11, 0xFFFF);
 			stateFixBlock();
 			// CHECK IN MULTIPLAYER MODE HOW MANY PLAYERS REMAIN
-			if ((activePlayers==0) && (gameMode==2)) {  // check in MP mode
+			if (((activePlayers-gameOverPlayers)==0) && (gameMode==2)) {  // check in MP mode
 				processState = gameWon;
 				finalizeGame();
 			}
@@ -707,6 +707,13 @@ void Looper::changeStateIdle() {
 		} else {
 			;
 		}
+	}else if((HAL_GetTick()-gameWonCheckCounter)>=423){
+		gameWonCheckCounter=HAL_GetTick();
+		i=0;
+		while((gameOverPlayerIds[i]!=0) && (i<20)){
+			i++;
+		}
+		gameOverPlayers = i;
 	}else if ((HAL_GetTick()-counter) >= blockDownCnt) {
 		counter = HAL_GetTick();
 		// fix block
@@ -717,14 +724,7 @@ void Looper::changeStateIdle() {
 		}
 	} else if ((HAL_GetTick()-updateScreenCounter)>=updateScreenTime){                              // stay in state
 		gameState = updateScreen;
-	} else if((HAL_GetTick()-gameWonCheckCounter)>=500){
-		gameWonCheckCounter=HAL_GetTick();
-		i=0;
-		while((gameOverPlayerIds[i]!=0) && (i<20)){
-			i++;
-		}
-		gameOverPlayers = i;
-	} else{
+	}  else{
 		;
 	}
 }

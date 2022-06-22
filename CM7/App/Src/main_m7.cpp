@@ -25,9 +25,9 @@
 void bootSystem(void);
 
 Looper looper = Looper();
-#ifdef DEBUG_M4_ONLY
+//#ifdef DEBUG_M4_ONLY
 volatile uint8_t isM4Ready = 0;
-#endif
+//#endif
 
 int main(void)
 {
@@ -43,12 +43,13 @@ int main(void)
   MX_I2C1_Init();
   MX_SPI5_Init();
 
-#ifdef DEBUG_M4_ONLY // Used to exclude M7 from running game to help debug M4 Core
+
   printf("Wait for M4 Core Ready\n");
   while (isM4Ready == 0)
   {
-    mqtt_intercom__handle();
+    mqtt_intercom__handler();
   }
+#ifdef DEBUG_M4_ONLY // Used to exclude M7 from running game to help debug M4 Core
   intercom_data_t mqtt_data;
   mqtt_data.cmd = MQTT_SUBSCRIBE;
   sprintf((char*) &mqtt_data.topic, "data_to_m7");
@@ -142,6 +143,7 @@ void mqtt_intercom__receive_cb(intercom_data_t *data)
   {
 
   case M4_READY:
+	isM4Ready = 1;
     looper.interCoreComReady = true;
     break;
   case M4_NOT_READY:
