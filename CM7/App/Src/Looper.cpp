@@ -68,6 +68,7 @@ void Looper::run() {
 			 else if (!(buttons & (uint32_t) TFTSHIELD_BUTTON_3))
 			 {
 				btnReleased((uint32_t)TFTSHIELD_BUTTON_3);
+				stateInitializeCom();
 				processState = gameSettingsMpDrawScreen;
 			 }
 			 //HAL_Delay(500);
@@ -94,7 +95,7 @@ void Looper::run() {
 			 runGame(); // singlePlayer as parameter
 			 break;
 		 case initializeComAndScreen:
-			 stateInitializeCom();
+			// stateInitializeCom();
 			 if(role==2){
 				 stateWaitOnStartScreen();
 			 	 processState = waitOnStart;
