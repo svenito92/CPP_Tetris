@@ -81,6 +81,7 @@ void Looper::run() {
 			 stateSetLevelLevel();
 			 break;
 		 case gameSettingsMpDrawScreen:
+
 		 	stateDrawMpScreen();
 		 	processState = gameSettingsMp;
 		 	break;
@@ -633,13 +634,14 @@ void Looper::stateKillLine() {
 				oldKilledLines=0;
 			}
 		}
-
-	data->cmd = MQTT_PUBLISH;
-	sprintf((char*)&data->topic,"KillLine");
-	data->data_length = 2;
-	data->data[0] = playerNr;
-	data->data[1] = linesSend;
-	mqtt_intercom__send_blocking(data, 1000);
+		if(linesSend !=0){
+			data->cmd = MQTT_PUBLISH;
+			sprintf((char*)&data->topic,"KillLine");
+			data->data_length = 2;
+			data->data[0] = playerNr;
+			data->data[1] = linesSend;
+			mqtt_intercom__send_blocking(data, 1000);
+		}
 	}
 	HAL_UART_Transmit(&huart3,(const uint8_t*)score +'0', 10, 0xFFFF);
 }
