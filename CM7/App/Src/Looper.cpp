@@ -617,7 +617,9 @@ void Looper::stateKillLine() {
 		if (playground.isLineFull(line)) {
 			playground.killLine(line);
 			score += 10000 / blockDownCnt;
-			accelerateGame();
+			if(gameMode ==1){
+				accelerateGame();
+			}
 			killedLines++;
 			writeScore(score, ST7735_BLUE);
 		}
